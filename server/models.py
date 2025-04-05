@@ -1,7 +1,11 @@
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import MetaData
 
-db = SQLAlchemy()
+metadata = MetaData(naming_convention={
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+})
+
+db = SQLAlchemy(metadata=metadata)
 
 
 class User(db.Model):
@@ -11,16 +15,17 @@ class User(db.Model):
     password = db.Column(db.String, nullable=False)
     role = db.Column(db.String, nullable=False)
 
-
-
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    location = db.Column(db.String, nullable=False)
+    name = db.Column(db.String, nullable=False)
+    description = db.Column(db.String, nullable=False)
     date = db.Column(db.DateTime, nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    created_by = db.Column(db.String, nullable=False)
+    location = db.Column(db.String, nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('name', 'date', name='uq_event_name_date'),
+    )
 
 class Registration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
