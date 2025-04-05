@@ -1,0 +1,32 @@
+classes;
+1 User Model
+2.Event Model
+3. Registration Model (Many-to-Many Relationship)
+4. Feedback Model
+
+relationships
+    1.1. User Model (Admin and Attendees)
+    • id: Primary key
+    • name: Name of the user
+    • email: Email for login/authentication
+    • password: Hashed password
+    • role: Admin or Attendee
+2. Event Model
+    • id: Primary key
+    • name: Name of the event
+    • description: Event details
+    • date: Date of the event
+    • location: Event location (can be a physical address or virtual link)
+    • created_by: Foreign key linking to the User model (admin)
+3. Registration Model (Many-to-Many Relationship)
+    • id: Primary key
+    • user_id: Foreign key linking to User
+    • event_id: Foreign key linking to Event
+    • status: Registered, Attended, Cancelled
+    • payment_status: Paid/Unpaid
+    • feedback: Text review/feedback provided by the user after the event (optional)
+4. Feedback Model (One-to-Many Relationship)
+    • id: Primary key
+    • event_id: Foreign key linking to Event
+    • user_id: Foreign key linking to User
+    • rating: Rating
