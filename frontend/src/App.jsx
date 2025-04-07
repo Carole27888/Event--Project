@@ -4,73 +4,81 @@ import { useState, useEffect } from "react"
 import { Sun, Moon, Menu, X } from "lucide-react"
 import { Routes, Route } from "react-router-dom"
 
-// Team members data
+
+
+// team members data 
 const teamMembers = [
-  { name: "Hakim Castro", avatar: "/placeholder.svg?height=100&width=100" },
-  { name: "Caroline Mutemi", avatar: "/placeholder.svg?height=100&width=100" },
-  { name: "Angela Gathoni", avatar: "/placeholder.svg?height=100&width=100" },
-  { name: "Tilen Otuoma", avatar: "/placeholder.svg?height=100&width=100" },
-  { name: "Jaafar Abdiwahid", avatar: "/placeholder.svg?height=100&width=100" },
-  { name: "Miriam Yego", avatar: "/placeholder.svg?height=100&width=100" },
+  { name: "Hakim Castro", avatar: "https://randomuser.me/api/portraits/men/1.jpg" },
+  { name: "Caroline Mutemi", avatar: "https://randomuser.me/api/portraits/women/2.jpg" },
+  { name: "Angela Gathoni", avatar: "https://randomuser.me/api/portraits/women/3.jpg" },
+  { name: "Tilen Otuoma", avatar: "https://randomuser.me/api/portraits/men/4.jpg" },
+  { name: "Jaafar Abdiwahid", avatar: "https://randomuser.me/api/portraits/men/5.jpg" },
+  { name: "Miriam Yego", avatar: "https://randomuser.me/api/portraits/women/6.jpg" },
 ]
 
-// Events data
+// events data 
 const events = [
   {
     type: "Birthday Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://images.unsplash.com/photo-1464349153735-7db50ed83c84?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
     rating: 5,
     description: "Memorable birthday celebrations for all ages",
   },
   {
     type: "Concert Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     rating: 5,
     description: "Spectacular concert setups with amazing sound systems",
   },
   {
     type: "Wedding Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     rating: 5,
     description: "Beautiful wedding arrangements for your special day",
   },
   {
     type: "Graduation Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     rating: 4.9,
     description: "Celebrate academic achievements in style",
   },
   {
     type: "Sport Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     rating: 4.8,
     description: "Well-organized sporting events with all facilities",
   },
   {
     type: "Private Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
     rating: 5,
     description: "Exclusive private events with personalized touches",
   },
 ]
 
-// Testimonials data
+//  testimonials 
 const testimonials = [
   {
     name: "Sarah Johnson",
-    avatar: "/placeholder.svg?height=80&width=80",
+    avatar: "https://randomuser.me/api/portraits/women/32.jpg",
     comment: "Eventify made my daughter's birthday absolutely perfect! The attention to detail was amazing.",
     rating: 5,
   },
   {
     name: "Michael Omondi",
-    avatar: "/placeholder.svg?height=80&width=80",
+    avatar: "https://randomuser.me/api/portraits/men/22.jpg",
     comment: "Our corporate event was flawlessly executed. The team is professional and creative.",
     rating: 5,
   },
   {
     name: "Amina Hassan",
-    avatar: "/placeholder.svg?height=80&width=80",
+    avatar: "https://randomuser.me/api/portraits/women/65.jpg",
     comment: "The wedding of my dreams! Everything was exactly as I imagined and more.",
     rating: 5,
   },
@@ -145,13 +153,13 @@ function App() {
                   href="#testimonials"
                   className="text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 px-3 py-2 text-sm font-medium transition-transform hover:scale-105"
                 >
-                  Feedback
+                  Testimonials
                 </a>
                 <a
                   href="#team"
                   className="text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 px-3 py-2 text-sm font-medium transition-transform hover:scale-105"
                 >
-                  Cantacts
+                  Our Team
                 </a>
               </div>
             </div>
@@ -279,7 +287,16 @@ function HomePage() {
                 className="flex flex-col rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105 bg-purple-50 dark:bg-gray-700"
               >
                 <div className="flex-shrink-0">
-                  <img className="h-48 w-full object-cover" src={event.image || "/placeholder.svg"} alt={event.type} />
+                  <img
+                    className="h-48 w-full object-cover"
+                    src={event.image || "/placeholder.svg"}
+                    alt={event.type}
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.src = "/placeholder.svg?height=300&width=400"
+                    }}
+                    loading="lazy"
+                  />
                 </div>
                 <div className="flex-1 p-6 flex flex-col justify-between">
                   <div className="flex-1">
@@ -316,9 +333,14 @@ function HomePage() {
               >
                 <div className="flex items-center mb-4">
                   <img
-                    className="h-12 w-12 rounded-full object-cover mr-4"
+                    className="h-16 w-16 rounded-full object-cover mr-4 border-2 border-purple-400"
                     src={testimonial.avatar || "/placeholder.svg"}
                     alt={testimonial.name}
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.src = "/placeholder.svg?height=80&width=80"
+                    }}
+                    loading="lazy"
                   />
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">{testimonial.name}</h3>
@@ -352,6 +374,11 @@ function HomePage() {
                     className="h-full w-full object-cover"
                     src={member.avatar || "/placeholder.svg"}
                     alt={member.name}
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.src = "/placeholder.svg?height=100&width=100"
+                    }}
+                    loading="lazy"
                   />
                 </div>
                 <div className="text-sm font-medium text-white">{member.name}</div>
