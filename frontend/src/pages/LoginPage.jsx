@@ -14,17 +14,25 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    // Basic validation
+    // Basic 
     if (!email || !password) {
       setError("Please fill in all fields")
       return
     }
 
-    // In a real app, you would authenticate with a backend here
-    // For demo purposes, we'll just simulate a successful login
+    // Hapa just incase tufanye Authentication kutoka backend
+    
+
+
+
+
+
     console.log("Logging in with:", { email, password })
 
-    // Simulate successful login
+
+
+
+
     setTimeout(() => {
       navigate("/")
     }, 1000)
@@ -127,6 +135,7 @@ const LoginPage = () => {
                 </div>
 
                 <div>
+                  {/* //hi button itakuwa crucial kupeleka user kwa ./me */}
                   <button
                     type="submit"
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-300"

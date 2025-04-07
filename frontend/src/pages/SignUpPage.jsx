@@ -27,11 +27,15 @@ const SignUpPage = () => {
       return
     }
 
-    // In a real app, you would register with a backend here
-    // For demo purposes, we'll just simulate a successful registration
+    // Tutafanya hapa regisstration kwa backend hapa
+    
+
+
     console.log("Registering with:", { name, email, password })
 
-    // Simulate successful registration
+    
+
+    
     setTimeout(() => {
       navigate("/login")
     }, 1000)

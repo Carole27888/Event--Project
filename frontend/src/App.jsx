@@ -7,15 +7,8 @@ import LoginPage from "./pages/LoginPage"
 import SignUpPage from "./pages/SignUpPage"
 import EventDetailPage from "./pages/EventDetailPage"
 
-// Add these imports at the top of your file if you're using local images
-// import birthdayImg from './assets/birthday.jpg';
-// import concertImg from './assets/concert.jpg';
-// import weddingImg from './assets/wedding.jpg';
-// import graduationImg from './assets/graduation.jpg';
-// import sportsImg from './assets/sports.jpg';
-// import privateImg from './assets/private.jpg';
 
-// Update the team members data with real images
+//  team members data 
 const teamMembers = [
   { name: "Hakim Castro", avatar: "https://randomuser.me/api/portraits/men/1.jpg" },
   { name: "Caroline Mutemi", avatar: "https://randomuser.me/api/portraits/women/2.jpg" },
@@ -25,7 +18,7 @@ const teamMembers = [
   { name: "Miriam Yego", avatar: "https://randomuser.me/api/portraits/women/6.jpg" },
 ]
 
-// Update the events data to use online image URLs and add more details
+//  events data 
 const events = [
   {
     id: "birthday",
@@ -137,7 +130,7 @@ const events = [
   },
 ]
 
-// Updated testimonials data with real profile pictures
+//  testimonials data 
 const testimonials = [
   {
     name: "Sarah Johnson",
