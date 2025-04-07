@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+:root {
+  --primary: #8b5cf6;
+  --primary-hover: #7c3aed;
+  --secondary: #ec4899;
+  --secondary-hover: #db2777;
+  --background-light: #f5f3ff;
+  --background-dark: #1f2937;
+  --text-light: #1f2937;
+  --text-dark: #f9fafb;
+}
+
+/* Custom animations */
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #2d3748;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4a5568;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
+
+/* Ensure dark mode works properly */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: var(--background-dark);
+  color: var(--text-dark);
+}
+
+body {
+  background-color: var(--background-light);
+  color: var(--text-light);
+}
+
