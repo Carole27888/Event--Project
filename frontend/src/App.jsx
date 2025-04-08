@@ -1,56 +1,120 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Routes, Route, Link, useNavigate } from "react-router-dom"
 import { Sun, Moon, Menu, X } from "lucide-react"
-import { Routes, Route } from "react-router-dom"
+import LoginPage from "./pages/LoginPage"
+import SignUpPage from "./pages/SignUpPage"
+import EventDetailPage from "./pages/EventDetailPage"
+import UserDashboard from "./pages/UserDashboard"
 
 // Team members data
 const teamMembers = [
-  { name: "Hakim Castro", avatar: "/placeholder.svg?height=100&width=100" },
-  { name: "Caroline Mutemi", avatar: "/placeholder.svg?height=100&width=100" },
-  { name: "Angela Gathoni", avatar: "/placeholder.svg?height=100&width=100" },
-  { name: "Tilen Otuoma", avatar: "/placeholder.svg?height=100&width=100" },
-  { name: "Jaafar Abdiwahid", avatar: "/placeholder.svg?height=100&width=100" },
-  { name: "Miriam Yego", avatar: "/placeholder.svg?height=100&width=100" },
+  { name: "Hakim Castro", avatar: "https://randomuser.me/api/portraits/men/1.jpg" },
+  { name: "Caroline Mutemi", avatar: "https://randomuser.me/api/portraits/women/2.jpg" },
+  { name: "Angela Gathoni", avatar: "https://randomuser.me/api/portraits/women/3.jpg" },
+  { name: "Tilen Otuoma", avatar: "https://randomuser.me/api/portraits/men/4.jpg" },
+  { name: "Jaafar Abdiwahid", avatar: "https://randomuser.me/api/portraits/men/5.jpg" },
+  { name: "Miriam Yego", avatar: "https://randomuser.me/api/portraits/women/6.jpg" },
 ]
 
 // Events data
 const events = [
   {
+    id: "birthday",
     type: "Birthday Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://images.unsplash.com/photo-1464349153735-7db50ed83c84?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
     rating: 5,
     description: "Memorable birthday celebrations for all ages",
+    totalEvents: 156,
+    attendees: 4500,
+    locations: ["Nairobi", "Mombasa", "Kisumu", "Nakuru"],
+    details: "Our birthday events are tailored to create unforgettable memories. From children's parties with themes like superheroes and princesses to elegant adult celebrations, we handle everything from venue decoration to entertainment and catering.",
+    gallery: [
+      "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1602631985686-1bb0e6a8696e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1533294455009-a77b7557d2d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    ],
   },
   {
+    id: "concert",
     type: "Concert Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     rating: 5,
     description: "Spectacular concert setups with amazing sound systems",
+    totalEvents: 78,
+    attendees: 25000,
+    locations: ["Nairobi", "Mombasa", "Eldoret", "Kisumu"],
+    details: "Our concert events feature state-of-the-art sound systems, lighting, and stage setups. We've organized concerts for both local and international artists, ensuring seamless execution from ticket sales to security management.",
+    gallery: [
+      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
+      "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    ],
   },
   {
+    id: "wedding",
     type: "Wedding Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     rating: 5,
     description: "Beautiful wedding arrangements for your special day",
+    totalEvents: 210,
+    attendees: 18000,
+    locations: ["Nairobi", "Mombasa", "Nakuru", "Naivasha", "Diani"],
+    details: "Our wedding planning services cover everything from traditional ceremonies to modern celebrations. We handle venue selection, decoration, catering, photography, and entertainment to ensure your special day is perfect in every way.",
+    gallery: [
+      "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
+      "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    ],
   },
   {
+    id: "graduation",
     type: "Graduation Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     rating: 4.9,
     description: "Celebrate academic achievements in style",
+    totalEvents: 95,
+    attendees: 12000,
+    locations: ["Nairobi", "Kisumu", "Mombasa", "Machakos"],
+    details: "Our graduation events celebrate academic milestones with style and elegance. We organize everything from small departmental ceremonies to large university-wide celebrations, ensuring the day is memorable for graduates and their families.",
+    gallery: [
+      "https://images.unsplash.com/photo-1627556592933-ffe99c1cd9eb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1621784563330-caee0b138a00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1564811527855-ed1dbf86a3c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
+    ],
   },
   {
+    id: "sports",
     type: "Sport Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://i.pinimg.com/736x/2a/d9/52/2ad9528157a867a34392504b0582c801.jpg",
     rating: 4.8,
     description: "Well-organized sporting events with all facilities",
+    totalEvents: 120,
+    attendees: 35000,
+    locations: ["Nairobi", "Eldoret", "Kisumu", "Mombasa", "Nakuru"],
+    details: "Our sports event management covers everything from local tournaments to national championships. We handle venue preparation, equipment, registration, officiating, and award ceremonies for various sports including football, athletics, basketball, and more.",
+    gallery: [
+      "https://i.pinimg.com/736x/a1/e7/ca/a1e7ca7e83364f204e9297336822e55f.jpg",
+      "https://i.pinimg.com/736x/5f/9c/fb/5f9cfb5435cc38b42750e5859be6c7eb.jpg",
+      "https://i.pinimg.com/736x/2f/07/5c/2f075ca026fb96cb6f53c5c5c8eb4902.jpg",
+    ],
   },
   {
+    id: "private",
     type: "Private Event",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
     rating: 5,
     description: "Exclusive private events with personalized touches",
+    totalEvents: 180,
+    attendees: 9000,
+    locations: ["Nairobi", "Mombasa", "Naivasha", "Nanyuki", "Malindi"],
+    details: "Our private events are tailored to meet the specific needs and preferences of our clients. From intimate dinners to exclusive corporate gatherings, we ensure privacy, luxury, and attention to detail for a truly memorable experience.",
+    gallery: [
+      "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    ],
   },
 ]
 
@@ -58,19 +122,19 @@ const events = [
 const testimonials = [
   {
     name: "Sarah Johnson",
-    avatar: "/placeholder.svg?height=80&width=80",
+    avatar: "https://randomuser.me/api/portraits/women/32.jpg",
     comment: "Eventify made my daughter's birthday absolutely perfect! The attention to detail was amazing.",
     rating: 5,
   },
   {
     name: "Michael Omondi",
-    avatar: "/placeholder.svg?height=80&width=80",
+    avatar: "https://randomuser.me/api/portraits/men/22.jpg",
     comment: "Our corporate event was flawlessly executed. The team is professional and creative.",
     rating: 5,
   },
   {
     name: "Amina Hassan",
-    avatar: "/placeholder.svg?height=80&width=80",
+    avatar: "https://randomuser.me/api/portraits/women/65.jpg",
     comment: "The wedding of my dreams! Everything was exactly as I imagined and more.",
     rating: 5,
   },
@@ -97,14 +161,23 @@ const StarRating = ({ rating }) => {
 }
 
 function App() {
-  const [darkMode, setDarkMode] = useState(false)
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('darkMode') === 'true' || 
+             window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark")
+      localStorage.setItem('darkMode', 'true')
     } else {
       document.documentElement.classList.remove("dark")
+      localStorage.setItem('darkMode', 'false')
     }
   }, [darkMode])
 
@@ -116,6 +189,14 @@ function App() {
     setIsMenuOpen(!isMenuOpen)
   }
 
+  const handleLogin = () => {
+    navigate("/login")
+  }
+
+  const handleSignUp = () => {
+    navigate("/signup")
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-purple-950 transition-colors duration-300">
       {/* Navbar */}
@@ -124,17 +205,20 @@ function App() {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
-                <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 animate-pulse">
+                <Link
+                  to="/"
+                  className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 animate-pulse"
+                >
                   Eventify
-                </span>
+                </Link>
               </div>
               <div className="hidden md:ml-6 md:flex md:space-x-8">
-                <a
-                  href="#home"
+                <Link
+                  to="/"
                   className="text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 px-3 py-2 text-sm font-medium transition-transform hover:scale-105"
                 >
                   Home
-                </a>
+                </Link>
                 <a
                   href="#events"
                   className="text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 px-3 py-2 text-sm font-medium transition-transform hover:scale-105"
@@ -145,13 +229,13 @@ function App() {
                   href="#testimonials"
                   className="text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 px-3 py-2 text-sm font-medium transition-transform hover:scale-105"
                 >
-                  Feedback
+                  Testimonials
                 </a>
                 <a
                   href="#team"
                   className="text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 px-3 py-2 text-sm font-medium transition-transform hover:scale-105"
                 >
-                  Cantacts
+                  Our Team
                 </a>
               </div>
             </div>
@@ -163,10 +247,16 @@ function App() {
                 {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </button>
               <div className="hidden md:flex md:items-center md:ml-6 space-x-3">
-                <button className="px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md transition-transform hover:scale-105">
+                <button
+                  onClick={handleLogin}
+                  className="px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md transition-transform hover:scale-105"
+                >
                   Login
                 </button>
-                <button className="px-4 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 border border-purple-600 dark:border-purple-400 hover:bg-purple-50 dark:hover:bg-gray-700 rounded-md transition-transform hover:scale-105">
+                <button
+                  onClick={handleSignUp}
+                  className="px-4 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 border border-purple-600 dark:border-purple-400 hover:bg-purple-50 dark:hover:bg-gray-700 rounded-md transition-transform hover:scale-105"
+                >
                   Sign Up
                 </button>
               </div>
@@ -186,37 +276,53 @@ function App() {
         {isMenuOpen && (
           <div className="md:hidden bg-white dark:bg-gray-800 shadow-lg animate-fadeIn">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <a
-                href="#home"
+              <Link
+                to="/"
                 className="block px-3 py-2 text-base font-medium text-gray-900 dark:text-white hover:bg-purple-100 dark:hover:bg-gray-700 rounded-md"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Home
-              </a>
+              </Link>
               <a
                 href="#events"
                 className="block px-3 py-2 text-base font-medium text-gray-900 dark:text-white hover:bg-purple-100 dark:hover:bg-gray-700 rounded-md"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Events
               </a>
               <a
                 href="#testimonials"
                 className="block px-3 py-2 text-base font-medium text-gray-900 dark:text-white hover:bg-purple-100 dark:hover:bg-gray-700 rounded-md"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Testimonials
               </a>
               <a
                 href="#team"
                 className="block px-3 py-2 text-base font-medium text-gray-900 dark:text-white hover:bg-purple-100 dark:hover:bg-gray-700 rounded-md"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Our Team
               </a>
             </div>
             <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-center space-x-3 px-5">
-                <button className="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md">
+                <button
+                  onClick={() => {
+                    handleLogin()
+                    setIsMenuOpen(false)
+                  }}
+                  className="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md"
+                >
                   Login
                 </button>
-                <button className="w-full px-4 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 border border-purple-600 dark:border-purple-400 hover:bg-purple-50 dark:hover:bg-gray-700 rounded-md">
+                <button
+                  onClick={() => {
+                    handleSignUp()
+                    setIsMenuOpen(false)
+                  }}
+                  className="w-full px-4 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 border border-purple-600 dark:border-purple-400 hover:bg-purple-50 dark:hover:bg-gray-700 rounded-md"
+                >
                   Sign Up
                 </button>
               </div>
@@ -227,13 +333,23 @@ function App() {
 
       {/* Main Content */}
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<HomePage events={events} testimonials={testimonials} teamMembers={teamMembers} />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/events/:eventId" element={<EventDetailPage events={events} />} />
+        <Route path="/dashboard" element={<UserDashboard />} />
       </Routes>
     </div>
   )
 }
 
-function HomePage() {
+function HomePage({ events, testimonials, teamMembers }) {
+  const navigate = useNavigate()
+
+  const handleEventClick = (eventId) => {
+    navigate(`/events/${eventId}`)
+  }
+
   return (
     <>
       {/* Hero Section */}
@@ -249,10 +365,16 @@ function HomePage() {
               Your premier event management solution. We create unforgettable experiences tailored to your needs.
             </p>
             <div className="mt-8 flex justify-center space-x-4 animate-fadeIn delay-200">
-              <button className="px-8 py-3 text-base font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+              <button
+                onClick={() => navigate("/login")}
+                className="px-8 py-3 text-base font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+              >
                 Login
               </button>
-              <button className="px-8 py-3 text-base font-medium text-purple-600 dark:text-purple-400 border border-purple-600 dark:border-purple-400 hover:bg-purple-50 dark:hover:bg-gray-700 rounded-md shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+              <button
+                onClick={() => navigate("/signup")}
+                className="px-8 py-3 text-base font-medium text-purple-600 dark:text-purple-400 border border-purple-600 dark:border-purple-400 hover:bg-purple-50 dark:hover:bg-gray-700 rounded-md shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+              >
                 Sign Up
               </button>
             </div>
@@ -276,18 +398,29 @@ function HomePage() {
             {events.map((event, index) => (
               <div
                 key={index}
-                className="flex flex-col rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105 bg-purple-50 dark:bg-gray-700"
+                className="flex flex-col rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105 bg-purple-50 dark:bg-gray-700 cursor-pointer"
+                onClick={() => handleEventClick(event.id)}
               >
                 <div className="flex-shrink-0">
-                  <img className="h-48 w-full object-cover" src={event.image || "/placeholder.svg"} alt={event.type} />
+                  <img
+                    className="h-48 w-full object-cover"
+                    src={event.image || "/placeholder.svg"}
+                    alt={event.type}
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.src = "/placeholder.svg?height=300&width=400"
+                    }}
+                    loading="lazy"
+                  />
                 </div>
                 <div className="flex-1 p-6 flex flex-col justify-between">
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{event.type}</h3>
                     <p className="mt-3 text-base text-gray-600 dark:text-gray-300">{event.description}</p>
                   </div>
-                  <div className="mt-4">
+                  <div className="mt-4 flex justify-between items-center">
                     <StarRating rating={event.rating} />
+                    <span className="text-sm text-purple-600 dark:text-purple-400 font-medium">View Details →</span>
                   </div>
                 </div>
               </div>
@@ -316,9 +449,14 @@ function HomePage() {
               >
                 <div className="flex items-center mb-4">
                   <img
-                    className="h-12 w-12 rounded-full object-cover mr-4"
+                    className="h-16 w-16 rounded-full object-cover mr-4 border-2 border-purple-400"
                     src={testimonial.avatar || "/placeholder.svg"}
                     alt={testimonial.name}
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.src = "/placeholder.svg?height=80&width=80"
+                    }}
+                    loading="lazy"
                   />
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">{testimonial.name}</h3>
@@ -352,6 +490,11 @@ function HomePage() {
                     className="h-full w-full object-cover"
                     src={member.avatar || "/placeholder.svg"}
                     alt={member.name}
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.src = "/placeholder.svg?height=100&width=100"
+                    }}
+                    loading="lazy"
                   />
                 </div>
                 <div className="text-sm font-medium text-white">{member.name}</div>
@@ -369,4 +512,3 @@ function HomePage() {
 }
 
 export default App
-
