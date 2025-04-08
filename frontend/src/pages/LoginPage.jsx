@@ -20,21 +20,13 @@ const LoginPage = () => {
       return
     }
 
-    // Hapa just incase tufanye Authentication kutoka backend
+    //backend hapa
     
-
-
-
-
-
     console.log("Logging in with:", { email, password })
 
-
-
-
-
+    // login  & redirect to dashboard
     setTimeout(() => {
-      navigate("/")
+      navigate("/dashboard")
     }, 1000)
   }
 
@@ -135,7 +127,6 @@ const LoginPage = () => {
                 </div>
 
                 <div>
-                  {/* //hi button itakuwa crucial kupeleka user kwa ./me */}
                   <button
                     type="submit"
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-300"
@@ -217,4 +208,3 @@ const LoginPage = () => {
 }
 
 export default LoginPage
-
