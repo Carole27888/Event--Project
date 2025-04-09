@@ -7,28 +7,58 @@ import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react"
 const LoginPage = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [role, setRole] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    // Basic 
-    if (!email || !password) {
-      setError("Please fill in all fields")
-      return
+    if (!email || !password || !role) {
+      setError("Please fill in all fields");
+      return;
     }
 
-    //backend hapa
-    
-    console.log("Logging in with:", { email, password })
+    try {
+      console.log("Logging in with:", { email, password, role });
 
-    // login  & redirect to dashboard
-    setTimeout(() => {
-      navigate("/dashboard")
-    }, 1000)
-  }
+      const response = await fetch("http://127.0.0.1:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, role }),
+      });
+
+      if (response.status === 401) {
+        setError("Invalid credentials. Please check your email, password, and role.");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Login successful:", data);
+        localStorage.setItem("userRole", data.user.role);
+
+        if (data.user.role === "admin" || data.user.role === "admin-dashboard") {
+          console.log("Admin role detected");
+          navigate("/admin");
+        } else if (data.user.role === "attendee") {
+          console.log("Attendee role detected");
+          navigate("/attendee-dashboard");
+        } else {
+          setError("Invalid role");
+        }
+      } else {
+        setError(data.message || "Login failed. Please try again.");
+      }
+    } catch (error) {
+      setError("An error occurred during login. Please check your connection and try again.");
+      console.error("Login error:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-purple-950 px-4 py-24">
@@ -72,7 +102,7 @@ const LoginPage = () => {
                       className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white sm:text-sm"
                       placeholder="you@example.com"
                     />
-                  </div>
+                  </div>attendee
                 </div>
 
                 <div>
@@ -104,6 +134,26 @@ const LoginPage = () => {
                       </button>
                     </div>
                   </div>
+                </div>
+
+                <div>
+                  <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Role
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    required
+                    className="block w-full pl-3 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+                  >
+                    <option value="" disabled>
+                      Select your role
+                    </option>
+                    <option value="admin-dashboard">Admin</option>
+                    <option value="attendee">Attendee</option>
+                  </select>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -165,7 +215,7 @@ const LoginPage = () => {
                         fill="#34A853"
                       />
                       <path
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18c-.75 1.48-1.18 3.15-1.18 4.93s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
                         fill="#FBBC05"
                       />
                       <path
@@ -184,7 +234,7 @@ const LoginPage = () => {
                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                       <path
                         fillRule="evenodd"
-                        d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.933.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.14 18.163 20 14.418 20 10c0-5.523-4.477-10-10-10z"
+                        d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.53 1.033 1.53 1.033.89 1.517 2.341 1.078 2.91.825.092-.645.35-1.077.635-1.327-2.22-.254-4.55-1.11-4.55-4.94 0-1.09.388-1.978 1.029-2.674-.102-.254-.446-1.282.098-2.668 0 0 .836-.267 2.737 1.029 1.142-.317 2.368-.476 3.57-.48 1.202-.004 2.428.163 3.57.48 1.9-1.296 2.737-1.029 2.737-1.029.544 1.386.2 2.414.098 2.668.64.696 1.028 1.585 1.028 2.674 0 3.834-2.33 4.684-4.56 4.93.36.303.69.899.69 1.816 0 1.312-.01 2.372-.01 2.685 0 .267.18.576.686.482C17.134 18.166 20 14.42 20 10c0-5.523-4.477-10-10-10z"
                         clipRule="evenodd"
                       />
                     </svg>
@@ -192,14 +242,6 @@ const LoginPage = () => {
                 </div>
               </div>
             </div>
-          </div>
-          <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
-            <p className="text-xs leading-5 text-center text-gray-500 dark:text-gray-400">
-              Don't have an account?{" "}
-              <Link to="/signup" className="font-medium text-purple-600 hover:text-purple-500 dark:text-purple-400">
-                Sign up
-              </Link>
-            </p>
           </div>
         </div>
       </div>

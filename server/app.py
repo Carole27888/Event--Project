@@ -90,10 +90,10 @@ def get_events():
     events = Event.query.all()
     events_data = [{
         "id": event.id,
-        "name": event.name,
-        "description": event.description,
-        "date": event.date,
+        "type": event.name,
         "location": event.location,
+        "date": event.date,
+        "details": event.description,
         "created_by": event.created_by
     } for event in events]
     return jsonify({"events": events_data})

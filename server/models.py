@@ -17,7 +17,7 @@ class User(db.Model):
     
     events_created = db.relationship('Event', backref='organizer', lazy=True)
     registrations = db.relationship('Registration', back_populates='user')
-    feedbacks = db.relationship('Feedback', back_populates='user')
+    feedback = db.relationship('Feedback', back_populates='user')
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,7 +32,7 @@ class Event(db.Model):
     )
     
     registrations = db.relationship('Registration', back_populates='event')
-    feedbacks = db.relationship('Feedback', back_populates='event')
+    feedback = db.relationship('Feedback', back_populates='event')
 
 class Registration(db.Model):
     id = db.Column(db.Integer, primary_key=True)

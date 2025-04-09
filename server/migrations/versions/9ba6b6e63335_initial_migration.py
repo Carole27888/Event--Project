@@ -1,8 +1,8 @@
-"""initial migration
+"""Initial migration
 
-Revision ID: 8a4baf82ac4d
+Revision ID: 9ba6b6e63335
 Revises: 
-Create Date: 2025-04-05 17:32:38.864024
+Create Date: 2025-04-08 16:58:55.173936
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8a4baf82ac4d'
+revision = '9ba6b6e63335'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -29,14 +29,14 @@ def upgrade():
     )
     op.create_table('event',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('type', sa.String(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('location', sa.String(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('description', sa.String(), nullable=False),
     sa.Column('date', sa.DateTime(), nullable=False),
-    sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('created_by', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.Column('location', sa.String(), nullable=False),
+    sa.Column('created_by', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['created_by'], ['user.id'], name=op.f('fk_event_created_by_user')),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name', 'date', name='uq_event_name_date')
     )
     op.create_table('feedback',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -44,8 +44,8 @@ def upgrade():
     sa.Column('event_id', sa.Integer(), nullable=False),
     sa.Column('rating', sa.Integer(), nullable=False),
     sa.Column('comment', sa.Text(), nullable=True),
-    sa.ForeignKeyConstraint(['event_id'], ['event.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['event_id'], ['event.id'], name=op.f('fk_feedback_event_id_event')),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], name=op.f('fk_feedback_user_id_user')),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('registration',
@@ -54,8 +54,8 @@ def upgrade():
     sa.Column('event_id', sa.Integer(), nullable=False),
     sa.Column('status', sa.String(), nullable=False),
     sa.Column('payment_status', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['event_id'], ['event.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['event_id'], ['event.id'], name=op.f('fk_registration_event_id_event')),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], name=op.f('fk_registration_user_id_user')),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
