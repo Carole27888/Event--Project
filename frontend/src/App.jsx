@@ -1,12 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Routes, Route, Link, useNavigate } from "react-router-dom"
+import { Routes, Route, Link, useNavigate, Navigate } from "react-router-dom"
 import { Sun, Moon, Menu, X } from "lucide-react"
 import LoginPage from "./pages/LoginPage"
 import SignUpPage from "./pages/SignUpPage"
 import EventDetailPage from "./pages/EventDetailPage"
 import UserDashboard from "./pages/UserDashboard"
+import AdminDashboard from "./pages/AdminDashboard"
+import AttendeeDashboard from "./pages/AttendeeDashboard"
 
 // Team members data
 const teamMembers = [
@@ -158,6 +160,14 @@ const StarRating = ({ rating }) => {
       <span className="ml-1 text-sm font-medium text-gray-700 dark:text-gray-300">{rating.toFixed(1)}</span>
     </div>
   )
+}
+
+function ProtectedRoute({ children, allowedRoles }) {
+  const userRole = localStorage.getItem("userRole"); // Retrieve the user's role from local storage
+  if (!allowedRoles.includes(userRole)) {
+    return <Navigate to="/login" replace />; // Redirect to login if the role is not allowed
+  }
+  return children;
 }
 
 function App() {
@@ -338,6 +348,22 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/events/:eventId" element={<EventDetailPage events={events} />} />
         <Route path="/dashboard" element={<UserDashboard />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "admin-dashboard"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/attendee-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["attendee"]}>
+              <AttendeeDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   )

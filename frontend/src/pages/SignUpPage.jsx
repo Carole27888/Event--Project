@@ -7,39 +7,53 @@ import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from "lucide-react"
 const SignUpPage = () => {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
+  const [role, setRole] = useState("admin")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    // Basic validation
-    if (!name || !email || !password || !confirmPassword) {
-      setError("Please fill in all fields")
-      return
+    if (!name || !email || !password || !confirmPassword || !role) {
+      setError("Please fill in all fields");
+      return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match")
-      return
+      setError("Passwords do not match");
+      return;
     }
 
-    // Tutafanya hapa regisstration kwa backend hapa
+    try {
+      const response = await fetch("http://127.0.0.1:5000/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password, role }),
+
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Sign-up failed");
+      }
+      console.log("Sign-up successful:", data);
+      setError(""); 
+    } catch (error) {
+      setError(error.message || "An error occurred during sign-up");
+    }
+
+    console.log("Registering with:", { name, email, password, role });
+
     
 
-
-    console.log("Registering with:", { name, email, password })
-
-    
-
-    
     setTimeout(() => {
-      navigate("/login")
-    }, 1000)
-  }
+      navigate("/login");
+    }, 1000);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-purple-950 px-4 py-24">
@@ -105,6 +119,36 @@ const SignUpPage = () => {
                       className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white sm:text-sm"
                       placeholder="you@example.com"
                     />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Account Type
+                  </label>
+                  <div className="flex gap-4">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="role"
+                        value="attendee"
+                        checked={role === "attendee"}
+                        onChange={() => setRole("attendee")}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-gray-700 dark:text-gray-300">Attendee</span>
+                    </label>
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="role"
+                        value="admin"
+                        checked={role === "admin"}
+                        onChange={() => setRole("admin")}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-gray-700 dark:text-gray-300">Admin</span>
+                    </label>
                   </div>
                 </div>
 
