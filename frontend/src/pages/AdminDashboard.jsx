@@ -1,5 +1,24 @@
+<<<<<<< Updated upstream
 /* eslint-disable no-unused-vars */
 "use client"
+=======
+
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Trash,
+  Users,
+  Bell,
+  MapPin,
+  Info,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Edit,
+  LogIn,
+} from "lucide-react";
+>>>>>>> Stashed changes
 
 import { useState } from "react"
 import { Plus, Trash, Users, Bell, MapPin, Info, X, Check, ChevronDown, ChevronUp } from "lucide-react"
@@ -34,6 +53,7 @@ const AdminDashboard = () => {
     })
   }
 
+<<<<<<< Updated upstream
   // Create a new event
   const handleCreateEvent = (e) => {
     e.preventDefault()
@@ -49,6 +69,193 @@ const AdminDashboard = () => {
     setEvents(events.filter((event) => event.id !== eventId))
     showNotification("Event deleted", "success")
   }
+=======
+  // Create a new event with authentication
+  // const handleCreateEvent = async (e) => {
+  //   e.preventDefault();
+
+  //   if (!isAuthenticated) {
+  //     showNotification("Please log in to create events", "error");
+  //     setIsLoginFormVisible(true);
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch(`${API_URL}/events`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         name: newEvent.name,
+  //         description: newEvent.description,
+  //         date: newEvent.date,
+  //         location: newEvent.location,
+  //       }),
+  //       credentials: "include", // Important for cookies/session
+  //     });
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       fetchEvents(); // Refresh events list
+  //       setNewEvent({ name: "", location: "", description: "", date: "" });
+  //       setIsCreatingEvent(false);
+  //       showNotification("Event created successfully", "success");
+  //     } else {
+  //       const errorData = await response.json();
+  //       showNotification(
+  //         errorData.message || "Failed to create event",
+  //         "error"
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error creating event:", error);
+  //     showNotification("Error connecting to server", "error");
+  //   }
+  // };
+  // const response = await fetch(`${API_URL}/events`, {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify({
+  //     name: newEvent.name,
+  //     description: newEvent.description,
+  //     date: newEvent.date,
+  //     location: newEvent.location,
+  //   }),
+  //   credentials: "include", // Ensure cookies are sent with the request
+  // });
+
+  const handleCreateEvent = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const response = await fetch(`${API_URL}/events`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newEvent.name,
+          description: newEvent.description,
+          date: newEvent.date,
+          location: newEvent.location,
+        }),
+        credentials: "include", // Ensure cookies are sent with the request
+      });
+  
+      // Check if the response is okay (status code 2xx)
+      if (response.ok) {
+        const data = await response.json();
+        fetchEvents(); // Refresh events list
+        setNewEvent({ name: "", location: "", description: "", date: "" });
+        setIsCreatingEvent(false);
+        showNotification("Event created successfully", "success");
+      } else {
+        // Handle error response from the server
+        const errorData = await response.json();
+        showNotification(errorData.message || "Failed to create event", "error");
+      }
+    } catch (error) {
+      console.error("Error creating event:", error);
+      showNotification("Error connecting to server", "error");
+    }
+  };
+  
+  
+
+  // Update an event with authentication
+  const handleUpdateEvent = async (e) => {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+      showNotification("Please log in to update events", "error");
+      setIsLoginFormVisible(true);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/events/${newEvent.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newEvent.name,
+          description: newEvent.description,
+          date: newEvent.date,
+          location: newEvent.location,
+        }),
+        credentials: "include", // Important for cookies/session
+      });
+
+      if (response.ok) {
+        fetchEvents(); // Refresh events list
+        setNewEvent({ name: "", location: "", description: "", date: "" });
+        setIsEditingEvent(false);
+        showNotification("Event updated successfully", "success");
+      } else {
+        const errorData = await response.json();
+        showNotification(
+          errorData.message || "Failed to update event",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error updating event:", error);
+      showNotification("Error connecting to server", "error");
+    }
+  };
+
+  // Delete an event with authentication
+  const handleDeleteEvent = async (eventId) => {
+    if (!isAuthenticated) {
+      showNotification("Please log in to delete events", "error");
+      setIsLoginFormVisible(true);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/events/${eventId}`, {
+        method: "DELETE",
+        credentials: "include", // Important for cookies/session
+      });
+
+      if (response.ok) {
+        setEvents(events.filter((event) => event.id !== eventId));
+        showNotification("Event deleted successfully", "success");
+      } else {
+        const errorData = await response.json();
+        showNotification(
+          errorData.message || "Failed to delete event",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      showNotification("Error connecting to server", "error");
+    }
+  };
+
+  // Edit event
+  const handleEditEvent = (event) => {
+    if (!isAuthenticated) {
+      showNotification("Please log in to edit events", "error");
+      setIsLoginFormVisible(true);
+      return;
+    }
+
+    setNewEvent({
+      id: event.id,
+      name: event.type,
+      description: event.details,
+      date: event.date || "",
+      location: event.location,
+    });
+    setIsEditingEvent(true);
+  };
+>>>>>>> Stashed changes
 
   // Register an attendee
   const handleRegisterAttendee = (eventId) => {
