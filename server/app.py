@@ -110,9 +110,34 @@ def get_event(event_id):
         "created_by": event.created_by
     })
 
+# @app.route('/events', methods=['POST'])
+# def create_event():
+#     if not is_logged_in():
+#         return jsonify({"message": "You must be logged in to create an event"}), 401
+
+#     data = request.get_json()
+#     if not all(field in data for field in ["name", "description", "date", "location"]):
+#         return jsonify({"message": "Missing fields"}), 400
+
+#     new_event = Event(
+#         name=data['name'],
+#         description=data['description'],
+#         date=data['date'],
+#         location=data['location'],
+#         created_by=session['user_id']
+#     )
+#     db.session.add(new_event)
+#     db.session.commit()
+
+#     return jsonify({
+#         "message": "Event created successfully",
+#         "event": {"id": new_event.id}
+#     }), 201
+
 @app.route('/events', methods=['POST'])
 def create_event():
     if not is_logged_in():
+        print("Session does not have user_id.")
         return jsonify({"message": "You must be logged in to create an event"}), 401
 
     data = request.get_json()
@@ -133,6 +158,7 @@ def create_event():
         "message": "Event created successfully",
         "event": {"id": new_event.id}
     }), 201
+
 
 @app.route('/events/<int:event_id>', methods=['PUT'])
 def update_event(event_id):

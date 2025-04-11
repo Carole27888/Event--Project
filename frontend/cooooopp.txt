@@ -1,0 +1,3701 @@
+/* eslint-disable no-unused-vars */
+"use client"
+
+import { useState } from "react"
+import { Plus, Trash, Users, Bell, MapPin, Info, X, Check, ChevronDown, ChevronUp } from "lucide-react"
+
+const AdminDashboard = () => {
+  const [events, setEvents] = useState([
+    { id: 1, type: "Workshop", location: "Nairobi", details: "Tech Workshop", attendees: 10, gallery: [] },
+    { id: 2, type: "Conference", location: "Mombasa", details: "Business Conference", attendees: 50, gallery: [] },
+    { id: 3, type: "Seminar", location: "Kisumu", details: "Educational Seminar", attendees: 25, gallery: [] },
+  ])
+
+  const [newEvent, setNewEvent] = useState({
+    type: "",
+    location: "",
+    details: "",
+    attendees: 0,
+    gallery: [],
+  })
+
+  const [expandedEvent, setExpandedEvent] = useState(null)
+  const [attendeeEmail, setAttendeeEmail] = useState("")
+  const [notificationMessage, setNotificationMessage] = useState("")
+  const [notification, setNotification] = useState({ show: false, message: "", type: "" })
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false)
+
+  //  form 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setNewEvent({
+      ...newEvent,
+      [name]: name === "attendees" ? Math.max(0, Number.parseInt(value) || 0) : value,
+    })
+  }
+
+  // Create a new event
+  const handleCreateEvent = (e) => {
+    e.preventDefault()
+    const newEventData = { ...newEvent, id: Date.now() }
+    setEvents([...events, newEventData])
+    setNewEvent({ type: "", location: "", details: "", attendees: 0, gallery: [] })
+    setIsCreatingEvent(false)
+    showNotification("Event created successfully", "success")
+  }
+
+  // Delete an event
+  const handleDeleteEvent = (eventId) => {
+    setEvents(events.filter((event) => event.id !== eventId))
+    showNotification("Event deleted", "success")
+  }
+
+  // Register an attendee
+  const handleRegisterAttendee = (eventId) => {
+    if (!attendeeEmail) {
+      showNotification("Please enter an attendee email", "error")
+      return
+    }
+
+    // Update attendee count
+    setEvents(events.map((event) => (event.id === eventId ? { ...event, attendees: event.attendees + 1 } : event)))
+
+    showNotification(`Registered ${attendeeEmail} successfully`, "success")
+    setAttendeeEmail("")
+  }
+
+  // Send notification
+  const handleSendNotification = (eventId) => {
+    if (!notificationMessage) {
+      showNotification("Please enter a notification message", "error")
+      return
+    }
+
+    showNotification("Notification sent to attendees", "success")
+    setNotificationMessage("")
+  }
+
+  // Show notification
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type })
+    setTimeout(() => {
+      setNotification({ show: false, message: "", type: "" })
+    }, 3000)
+  }
+
+  // Toggle event expansion
+  const toggleEventExpansion = (eventId) => {
+    setExpandedEvent(expandedEvent === eventId ? null : eventId)
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+      {/* Notification */}
+      {notification.show && (
+        <div
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 ${
+            notification.type === "success"
+              ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+              : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+          }`}
+        >
+          {notification.type === "success" ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
+          <span>{notification.message}</span>
+        </div>
+      )}
+
+      <div className="max-w-5xl mx-auto">
+        <header className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your events and attendees</p>
+        </header>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Events</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">{events.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600 dark:text-green-400">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Attendees</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {events.reduce((sum, event) => sum + event.attendees, 0)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
+                <MapPin className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Locations</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {new Set(events.map((event) => event.location)).size}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Create Event Button */}
+        {!isCreatingEvent && (
+          <button
+            onClick={() => setIsCreatingEvent(true)}
+            className="mb-6 flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create New Event
+          </button>
+        )}
+
+        {/* Create Event Form */}
+        {isCreatingEvent && (
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Create New Event</h2>
+              <button
+                onClick={() => setIsCreatingEvent(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateEvent} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Event Type
+                  </label>
+                  <input
+                    id="type"
+                    type="text"
+                    name="type"
+                    value={newEvent.type}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Workshop, Conference"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Location
+                  </label>
+                  <input
+                    id="location"
+                    type="text"
+                    name="location"
+                    value={newEvent.location}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Nairobi, Mombasa"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="details" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Details
+                </label>
+                <textarea
+                  id="details"
+                  name="details"
+                  value={newEvent.details}
+                  onChange={handleInputChange}
+                  placeholder="Describe the event..."
+                  required
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="attendees" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Initial Attendees
+                </label>
+                <input
+                  id="attendees"
+                  type="number"
+                  name="attendees"
+                  value={newEvent.attendees}
+                  onChange={handleInputChange}
+                  min="0"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsCreatingEvent(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Create Event
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Events List */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Manage Events</h2>
+          </div>
+
+          {events.length === 0 ? (
+            <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+              No events found. Create your first event to get started.
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              {events.map((event) => (
+                <li key={event.id} className="p-6">
+                  <div
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => toggleEventExpansion(event.id)}
+                  >
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{event.type}</h3>
+                      <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {event.location}
+                        <span className="mx-2">•</span>
+                        <Users className="h-4 w-4 mr-1" />
+                        {event.attendees} attendees
+                      </div>
+                    </div>
+                    <div>
+                      {expandedEvent === event.id ? (
+                        <ChevronUp className="h-5 w-5 text-gray-400" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+
+                  {expandedEvent === event.id && (
+                    <div className="mt-4 space-y-4">
+                      <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                        <div className="flex items-start">
+                          <Info className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{event.details}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Register Attendee
+                          </label>
+                          <div className="flex">
+                            <input
+                              type="email"
+                              value={attendeeEmail}
+                              onChange={(e) => setAttendeeEmail(e.target.value)}
+                              placeholder="Email address"
+                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                            <button
+                              onClick={() => handleRegisterAttendee(event.id)}
+                              className="px-4 py-2 bg-green-600 text-white rounded-r-md hover:bg-green-700"
+                            >
+                              Register
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Send Notification
+                          </label>
+                          <div className="flex">
+                            <input
+                              type="text"
+                              value={notificationMessage}
+                              onChange={(e) => setNotificationMessage(e.target.value)}
+                              placeholder="Notification message"
+                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                            <button
+                              onClick={() => handleSendNotification(event.id)}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
+                            >
+                              <Bell className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                        >
+                          <Trash className="h-4 w-4 mr-2" />
+                          Delete Event
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default AdminDashboard
+
+
+// from cl 
+/* eslint-disable no-unused-vars */
+"use client"
+
+import { useState, useEffect } from "react"
+import { Plus, Trash, Users, Bell, MapPin, Info, X, Check, ChevronDown, ChevronUp, Edit } from "lucide-react"
+
+const API_URL = "http://127.0.0.1:5000"
+
+const AdminDashboard = () => {
+  const [events, setEvents] = useState([])
+  const [newEvent, setNewEvent] = useState({
+    name: "",
+    location: "",
+    description: "",
+    date: "",
+  })
+
+  const [expandedEvent, setExpandedEvent] = useState(null)
+  const [attendeeEmail, setAttendeeEmail] = useState("")
+  const [notificationMessage, setNotificationMessage] = useState("")
+  const [notification, setNotification] = useState({ show: false, message: "", type: "" })
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false)
+  const [isEditingEvent, setIsEditingEvent] = useState(false)
+  const [currentUser, setCurrentUser] = useState(null)
+
+  // Fetch events on component mount
+  useEffect(() => {
+    fetchEvents()
+    fetchCurrentUser()
+  }, [])
+
+  // Fetch current user
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await fetch(`${API_URL}/me`, {
+        method: "GET",
+        credentials: "include",
+      })
+      if (response.ok) {
+        const userData = await response.json()
+        setCurrentUser(userData)
+      }
+    } catch (error) {
+      console.error("Error fetching current user:", error)
+    }
+  }
+
+  // Fetch all events
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch(`${API_URL}/events`)
+      if (response.ok) {
+        const data = await response.json()
+        setEvents(data.events)
+      } else {
+        showNotification("Failed to fetch events", "error")
+      }
+    } catch (error) {
+      console.error("Error fetching events:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setNewEvent({
+      ...newEvent,
+      [name]: name === "attendees" ? Math.max(0, Number.parseInt(value) || 0) : value,
+    })
+  }
+
+  // Create a new event
+  const handleCreateEvent = async (e) => {
+    e.preventDefault()
+    
+    try {
+      const response = await fetch(`${API_URL}/events`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          name: newEvent.name,
+          description: newEvent.description,
+          date: newEvent.date,
+          location: newEvent.location,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        fetchEvents() // Refresh events list
+        setNewEvent({ name: "", location: "", description: "", date: "" })
+        setIsCreatingEvent(false)
+        showNotification("Event created successfully", "success")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to create event", "error")
+      }
+    } catch (error) {
+      console.error("Error creating event:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Update an event
+  const handleUpdateEvent = async (e) => {
+    e.preventDefault()
+    
+    try {
+      const response = await fetch(`${API_URL}/events/${newEvent.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          name: newEvent.name,
+          description: newEvent.description,
+          date: newEvent.date,
+          location: newEvent.location,
+        }),
+      })
+
+      if (response.ok) {
+        fetchEvents() // Refresh events list
+        setNewEvent({ name: "", location: "", description: "", date: "" })
+        setIsEditingEvent(false)
+        showNotification("Event updated successfully", "success")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to update event", "error")
+      }
+    } catch (error) {
+      console.error("Error updating event:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Delete an event
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      const response = await fetch(`${API_URL}/events/${eventId}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+
+      if (response.ok) {
+        setEvents(events.filter((event) => event.id !== eventId))
+        showNotification("Event deleted successfully", "success")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to delete event", "error")
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Edit event
+  const handleEditEvent = (event) => {
+    setNewEvent({
+      id: event.id,
+      name: event.type,
+      description: event.details,
+      date: event.date || "",
+      location: event.location,
+    })
+    setIsEditingEvent(true)
+  }
+
+  // Register an attendee
+  const handleRegisterAttendee = async (eventId) => {
+    if (!attendeeEmail) {
+      showNotification("Please enter an attendee email", "error")
+      return
+    }
+
+    try {
+      // First, we would need to have the user registered in the system
+      // For simplicity, we'll assume the user exists and we know their ID
+      // In a real app, you'd need to look up the user by email
+      const userId = 1 // This would come from a user search or registration
+
+      const response = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          event_id: eventId,
+          status: "registered",
+        }),
+      })
+
+      if (response.ok) {
+        // Update local state to reflect the change
+        setEvents(
+          events.map((event) => 
+            event.id === eventId 
+              ? { ...event, attendees: (event.attendees || 0) + 1 } 
+              : event
+          )
+        )
+        showNotification(`Registered ${attendeeEmail} successfully`, "success")
+        setAttendeeEmail("")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to register attendee", "error")
+      }
+    } catch (error) {
+      console.error("Error registering attendee:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Send notification
+  const handleSendNotification = (eventId) => {
+    if (!notificationMessage) {
+      showNotification("Please enter a notification message", "error")
+      return
+    }
+
+    // In a real app, you would call an API endpoint to send notifications
+    // Since there's no specific endpoint in your backend for notifications,
+    // we'll just simulate it for now
+    
+    showNotification("Notification sent to attendees", "success")
+    setNotificationMessage("")
+  }
+
+  // Show notification
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type })
+    setTimeout(() => {
+      setNotification({ show: false, message: "", type: "" })
+    }, 3000)
+  }
+
+  // Toggle event expansion
+  const toggleEventExpansion = (eventId) => {
+    setExpandedEvent(expandedEvent === eventId ? null : eventId)
+  }
+
+  // Calculate total attendees
+  const calculateTotalAttendees = () => {
+    return events.reduce((sum, event) => sum + (event.attendees || 0), 0)
+  }
+
+  // Get unique locations
+  const getUniqueLocations = () => {
+    return new Set(events.map((event) => event.location)).size
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+      {/* Notification */}
+      {notification.show && (
+        <div
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 ${
+            notification.type === "success"
+              ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+              : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+          }`}
+        >
+          {notification.type === "success" ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
+          <span>{notification.message}</span>
+        </div>
+      )}
+
+      <div className="max-w-5xl mx-auto">
+        <header className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your events and attendees</p>
+          {currentUser && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              Logged in as: {currentUser.name} ({currentUser.role})
+            </p>
+          )}
+        </header>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Events</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">{events.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600 dark:text-green-400">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Attendees</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {calculateTotalAttendees()}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
+                <MapPin className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Locations</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {getUniqueLocations()}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Create/Edit Event Button */}
+        {!isCreatingEvent && !isEditingEvent && (
+          <button
+            onClick={() => setIsCreatingEvent(true)}
+            className="mb-6 flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create New Event
+          </button>
+        )}
+
+        {/* Create Event Form */}
+        {isCreatingEvent && (
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Create New Event</h2>
+              <button
+                onClick={() => setIsCreatingEvent(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateEvent} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Event Name
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    value={newEvent.name}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Tech Workshop, Conference"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Location
+                  </label>
+                  <input
+                    id="location"
+                    type="text"
+                    name="location"
+                    value={newEvent.location}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Nairobi, Mombasa"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Date
+                </label>
+                <input
+                  id="date"
+                  type="date"
+                  name="date"
+                  value={newEvent.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={newEvent.description}
+                  onChange={handleInputChange}
+                  placeholder="Describe the event..."
+                  required
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsCreatingEvent(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Create Event
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Edit Event Form */}
+        {isEditingEvent && (
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Event</h2>
+              <button
+                onClick={() => setIsEditingEvent(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateEvent} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Event Name
+                  </label>
+                  <input
+                    id="edit-name"
+                    type="text"
+                    name="name"
+                    value={newEvent.name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="edit-location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Location
+                  </label>
+                  <input
+                    id="edit-location"
+                    type="text"
+                    name="location"
+                    value={newEvent.location}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="edit-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Date
+                </label>
+                <input
+                  id="edit-date"
+                  type="date"
+                  name="date"
+                  value={newEvent.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Description
+                </label>
+                <textarea
+                  id="edit-description"
+                  name="description"
+                  value={newEvent.description}
+                  onChange={handleInputChange}
+                  required
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingEvent(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Update Event
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Events List */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Manage Events</h2>
+          </div>
+
+          {events.length === 0 ? (
+            <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+              No events found. Create your first event to get started.
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              {events.map((event) => (
+                <li key={event.id} className="p-6">
+                  <div
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => toggleEventExpansion(event.id)}
+                  >
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{event.type}</h3>
+                      <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {event.location}
+                        {event.date && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span>{new Date(event.date).toLocaleDateString()}</span>
+                          </>
+                        )}
+                        <span className="mx-2">•</span>
+                        <Users className="h-4 w-4 mr-1" />
+                        {event.attendees || 0} attendees
+                      </div>
+                    </div>
+                    <div>
+                      {expandedEvent === event.id ? (
+                        <ChevronUp className="h-5 w-5 text-gray-400" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+
+                  {expandedEvent === event.id && (
+                    <div className="mt-4 space-y-4">
+                      <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                        <div className="flex items-start">
+                          <Info className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{event.details}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Register Attendee
+                          </label>
+                          <div className="flex">
+                            <input
+                              type="email"
+                              value={attendeeEmail}
+                              onChange={(e) => setAttendeeEmail(e.target.value)}
+                              placeholder="Email address"
+                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                            <button
+                              onClick={() => handleRegisterAttendee(event.id)}
+                              className="px-4 py-2 bg-green-600 text-white rounded-r-md hover:bg-green-700"
+                            >
+                              Register
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Send Notification
+                          </label>
+                          <div className="flex">
+                            <input
+                              type="text"
+                              value={notificationMessage}
+                              onChange={(e) => setNotificationMessage(e.target.value)}
+                              placeholder="Notification message"
+                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                            <button
+                              onClick={() => handleSendNotification(event.id)}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
+                            >
+                              <Bell className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end space-x-3">
+                        <button
+                          onClick={() => handleEditEvent(event)}
+                          className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Event
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                        >
+                          <Trash className="h-4 w-4 mr-2" />
+                          Delete Event
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default AdminDashboard
+
+cl2
+
+/* eslint-disable no-unused-vars */
+"use client"
+
+import { useState, useEffect } from "react"
+import { Plus, Trash, Users, Bell, MapPin, Info, X, Check, ChevronDown, ChevronUp, Edit } from "lucide-react"
+
+const API_URL = "http://127.0.0.1:5000"
+
+const AdminDashboard = () => {
+  const [events, setEvents] = useState([])
+  const [newEvent, setNewEvent] = useState({
+    name: "",
+    location: "",
+    description: "",
+    date: "",
+  })
+
+  const [expandedEvent, setExpandedEvent] = useState(null)
+  const [attendeeEmail, setAttendeeEmail] = useState("")
+  const [notificationMessage, setNotificationMessage] = useState("")
+  const [notification, setNotification] = useState({ show: false, message: "", type: "" })
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false)
+  const [isEditingEvent, setIsEditingEvent] = useState(false)
+  const [currentUser, setCurrentUser] = useState(null)
+
+  // Fetch events on component mount
+  useEffect(() => {
+    fetchEvents()
+    fetchCurrentUser()
+  }, [])
+
+  // Fetch current user
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await fetch(`${API_URL}/me`, {
+        method: "GET",
+        credentials: "include",
+      })
+      if (response.ok) {
+        const userData = await response.json()
+        setCurrentUser(userData)
+      }
+    } catch (error) {
+      console.error("Error fetching current user:", error)
+    }
+  }
+
+  // Fetch all events
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch(`${API_URL}/events`)
+      if (response.ok) {
+        const data = await response.json()
+        setEvents(data.events)
+      } else {
+        showNotification("Failed to fetch events", "error")
+      }
+    } catch (error) {
+      console.error("Error fetching events:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setNewEvent({
+      ...newEvent,
+      [name]: name === "attendees" ? Math.max(0, Number.parseInt(value) || 0) : value,
+    })
+  }
+
+  // Create a new event - removed login check
+  const handleCreateEvent = async (e) => {
+    e.preventDefault()
+    
+    try {
+      const response = await fetch(`${API_URL}/events`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Still send cookies for backend authentication
+        body: JSON.stringify({
+          name: newEvent.name,
+          description: newEvent.description,
+          date: newEvent.date,
+          location: newEvent.location,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        fetchEvents() // Refresh events list
+        setNewEvent({ name: "", location: "", description: "", date: "" })
+        setIsCreatingEvent(false)
+        showNotification("Event created successfully", "success")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to create event", "error")
+      }
+    } catch (error) {
+      console.error("Error creating event:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Update an event - removed login check
+  const handleUpdateEvent = async (e) => {
+    e.preventDefault()
+    
+    try {
+      const response = await fetch(`${API_URL}/events/${newEvent.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Still send cookies for backend authentication
+        body: JSON.stringify({
+          name: newEvent.name,
+          description: newEvent.description,
+          date: newEvent.date,
+          location: newEvent.location,
+        }),
+      })
+
+      if (response.ok) {
+        fetchEvents() // Refresh events list
+        setNewEvent({ name: "", location: "", description: "", date: "" })
+        setIsEditingEvent(false)
+        showNotification("Event updated successfully", "success")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to update event", "error")
+      }
+    } catch (error) {
+      console.error("Error updating event:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Delete an event - removed login check
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      const response = await fetch(`${API_URL}/events/${eventId}`, {
+        method: "DELETE",
+        credentials: "include", // Still send cookies for backend authentication
+      })
+
+      if (response.ok) {
+        setEvents(events.filter((event) => event.id !== eventId))
+        showNotification("Event deleted successfully", "success")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to delete event", "error")
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Edit event
+  const handleEditEvent = (event) => {
+    setNewEvent({
+      id: event.id,
+      name: event.type,
+      description: event.details,
+      date: event.date || "",
+      location: event.location,
+    })
+    setIsEditingEvent(true)
+  }
+
+  // Register an attendee
+  const handleRegisterAttendee = async (eventId) => {
+    if (!attendeeEmail) {
+      showNotification("Please enter an attendee email", "error")
+      return
+    }
+
+    try {
+      // First, we would need to have the user registered in the system
+      // For simplicity, we'll assume the user exists and we know their ID
+      // In a real app, you'd need to look up the user by email
+      const userId = 1 // This would come from a user search or registration
+
+      const response = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          event_id: eventId,
+          status: "registered",
+        }),
+      })
+
+      if (response.ok) {
+        // Update local state to reflect the change
+        setEvents(
+          events.map((event) => 
+            event.id === eventId 
+              ? { ...event, attendees: (event.attendees || 0) + 1 } 
+              : event
+          )
+        )
+        showNotification(`Registered ${attendeeEmail} successfully`, "success")
+        setAttendeeEmail("")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to register attendee", "error")
+      }
+    } catch (error) {
+      console.error("Error registering attendee:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Send notification
+  const handleSendNotification = (eventId) => {
+    if (!notificationMessage) {
+      showNotification("Please enter a notification message", "error")
+      return
+    }
+
+    // In a real app, you would call an API endpoint to send notifications
+    // Since there's no specific endpoint in your backend for notifications,
+    // we'll just simulate it for now
+    
+    showNotification("Notification sent to attendees", "success")
+    setNotificationMessage("")
+  }
+
+  // Show notification
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type })
+    setTimeout(() => {
+      setNotification({ show: false, message: "", type: "" })
+    }, 3000)
+  }
+
+  // Toggle event expansion
+  const toggleEventExpansion = (eventId) => {
+    setExpandedEvent(expandedEvent === eventId ? null : eventId)
+  }
+
+  // Calculate total attendees
+  const calculateTotalAttendees = () => {
+    return events.reduce((sum, event) => sum + (event.attendees || 0), 0)
+  }
+
+  // Get unique locations
+  const getUniqueLocations = () => {
+    return new Set(events.map((event) => event.location)).size
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+      {/* Notification */}
+      {notification.show && (
+        <div
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 ${
+            notification.type === "success"
+              ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+              : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+          }`}
+        >
+          {notification.type === "success" ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
+          <span>{notification.message}</span>
+        </div>
+      )}
+
+      <div className="max-w-5xl mx-auto">
+        <header className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your events and attendees</p>
+          {currentUser && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              Logged in as: {currentUser.name} ({currentUser.role})
+            </p>
+          )}
+        </header>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Events</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">{events.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600 dark:text-green-400">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Attendees</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {calculateTotalAttendees()}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
+                <MapPin className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Locations</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {getUniqueLocations()}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Create/Edit Event Button */}
+        {!isCreatingEvent && !isEditingEvent && (
+          <button
+            onClick={() => setIsCreatingEvent(true)}
+            className="mb-6 flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create New Event
+          </button>
+        )}
+
+        {/* Create Event Form */}
+        {isCreatingEvent && (
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Create New Event</h2>
+              <button
+                onClick={() => setIsCreatingEvent(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateEvent} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Event Name
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    value={newEvent.name}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Tech Workshop, Conference"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Location
+                  </label>
+                  <input
+                    id="location"
+                    type="text"
+                    name="location"
+                    value={newEvent.location}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Nairobi, Mombasa"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Date
+                </label>
+                <input
+                  id="date"
+                  type="date"
+                  name="date"
+                  value={newEvent.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={newEvent.description}
+                  onChange={handleInputChange}
+                  placeholder="Describe the event..."
+                  required
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsCreatingEvent(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Create Event
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Edit Event Form */}
+        {isEditingEvent && (
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Event</h2>
+              <button
+                onClick={() => setIsEditingEvent(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateEvent} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Event Name
+                  </label>
+                  <input
+                    id="edit-name"
+                    type="text"
+                    name="name"
+                    value={newEvent.name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="edit-location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Location
+                  </label>
+                  <input
+                    id="edit-location"
+                    type="text"
+                    name="location"
+                    value={newEvent.location}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="edit-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Date
+                </label>
+                <input
+                  id="edit-date"
+                  type="date"
+                  name="date"
+                  value={newEvent.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Description
+                </label>
+                <textarea
+                  id="edit-description"
+                  name="description"
+                  value={newEvent.description}
+                  onChange={handleInputChange}
+                  required
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingEvent(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Update Event
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Events List */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Manage Events</h2>
+          </div>
+
+          {events.length === 0 ? (
+            <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+              No events found. Create your first event to get started.
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              {events.map((event) => (
+                <li key={event.id} className="p-6">
+                  <div
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => toggleEventExpansion(event.id)}
+                  >
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{event.type}</h3>
+                      <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {event.location}
+                        {event.date && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span>{new Date(event.date).toLocaleDateString()}</span>
+                          </>
+                        )}
+                        <span className="mx-2">•</span>
+                        <Users className="h-4 w-4 mr-1" />
+                        {event.attendees || 0} attendees
+                      </div>
+                    </div>
+                    <div>
+                      {expandedEvent === event.id ? (
+                        <ChevronUp className="h-5 w-5 text-gray-400" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+
+                  {expandedEvent === event.id && (
+                    <div className="mt-4 space-y-4">
+                      <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                        <div className="flex items-start">
+                          <Info className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{event.details}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Register Attendee
+                          </label>
+                          <div className="flex">
+                            <input
+                              type="email"
+                              value={attendeeEmail}
+                              onChange={(e) => setAttendeeEmail(e.target.value)}
+                              placeholder="Email address"
+                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                            <button
+                              onClick={() => handleRegisterAttendee(event.id)}
+                              className="px-4 py-2 bg-green-600 text-white rounded-r-md hover:bg-green-700"
+                            >
+                              Register
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Send Notification
+                          </label>
+                          <div className="flex">
+                            <input
+                              type="text"
+                              value={notificationMessage}
+                              onChange={(e) => setNotificationMessage(e.target.value)}
+                              placeholder="Notification message"
+                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                            <button
+                              onClick={() => handleSendNotification(event.id)}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
+                            >
+                              <Bell className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end space-x-3">
+                        <button
+                          onClick={() => handleEditEvent(event)}
+                          className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Event
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                        >
+                          <Trash className="h-4 w-4 mr-2" />
+                          Delete Event
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default AdminDashboard
+
+
+
+from vs 
+/* eslint-disable no-unused-vars */
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Trash,
+  Users,
+  Bell,
+  MapPin,
+  Info,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+
+const AdminDashboard = () => {
+  const [events, setEvents] = useState([]);
+  const [newEvent, setNewEvent] = useState({
+    type: "",
+    location: "",
+    details: "",
+    attendees: 0,
+    gallery: [],
+  });
+
+  const [expandedEvent, setExpandedEvent] = useState(null);
+  const [attendeeEmail, setAttendeeEmail] = useState("");
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false);
+
+  // Fetch events from backend
+  useEffect(() => {
+    fetch("http://localhost:5000/events")
+      .then((res) => res.json())
+      .then((data) => setEvents(data))
+      .catch((err) => {
+        console.error("Error fetching events:", err);
+        showNotification("Failed to fetch events", "error");
+      });
+  }, []);
+
+  // Input change
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewEvent({
+      ...newEvent,
+      [name]: name === "attendees" ? Math.max(0, parseInt(value) || 0) : value,
+    });
+  };
+
+  // Create event
+  const handleCreateEvent = (e) => {
+    e.preventDefault();
+
+    fetch("http://localhost:5000/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newEvent),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setEvents([...events, data]);
+        setNewEvent({
+          type: "",
+          location: "",
+          details: "",
+          attendees: 0,
+          gallery: [],
+        });
+        setIsCreatingEvent(false);
+        showNotification("Event created successfully", "success");
+      })
+      .catch(() => {
+        showNotification("Failed to create event", "error");
+      });
+  };
+
+  // Delete event
+  const handleDeleteEvent = (id) => {
+    fetch(`http://localhost:5000/events/${id}`, {
+      method: "DELETE",
+    })
+      .then(() => {
+        setEvents(events.filter((event) => event.id !== id));
+        showNotification("Event deleted", "success");
+      })
+      .catch(() => showNotification("Failed to delete event", "error"));
+  };
+
+  // Register attendee
+  const handleRegisterAttendee = (eventId) => {
+    if (!attendeeEmail) {
+      showNotification("Please enter an attendee email", "error");
+      return;
+    }
+
+    const event = events.find((e) => e.id === eventId);
+    if (!event) return;
+
+    const updatedEvent = { ...event, attendees: event.attendees + 1 };
+
+    fetch(`http://localhost:5000/events/${eventId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ attendees: updatedEvent.attendees }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setEvents(events.map((e) => (e.id === data.id ? data : e)));
+        showNotification(`Registered ${attendeeEmail} successfully`, "success");
+        setAttendeeEmail("");
+      })
+      .catch(() => showNotification("Failed to register attendee", "error"));
+  };
+
+  // Send notification
+  const handleSendNotification = (eventId) => {
+    if (!notificationMessage) {
+      showNotification("Please enter a notification message", "error");
+      return;
+    }
+
+    // You can connect this to a backend notification API
+    showNotification("Notification sent to attendees", "success");
+    setNotificationMessage("");
+  };
+
+  // Notification logic
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type });
+    setTimeout(
+      () => setNotification({ show: false, message: "", type: "" }),
+      3000
+    );
+  };
+
+  // Toggle event expansion
+  const toggleEventExpansion = (id) => {
+    setExpandedEvent(expandedEvent === id ? null : id);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+      {/* Notification */}
+      {notification.show && (
+        <div
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 ${
+            notification.type === "success"
+              ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+              : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+          }`}
+        >
+          {notification.type === "success" ? (
+            <Check className="h-5 w-5" />
+          ) : (
+            <X className="h-5 w-5" />
+          )}
+          <span>{notification.message}</span>
+        </div>
+      )}
+
+      <div className="max-w-5xl mx-auto">
+        <header className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Admin Dashboard
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Manage your events and attendees
+          </p>
+        </header>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="stat-box">
+            <div className="icon-wrapper bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+              <Users className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="stat-title">Total Events</p>
+              <p className="stat-value">{events.length}</p>
+            </div>
+          </div>
+
+          <div className="stat-box">
+            <div className="icon-wrapper bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+              <Users className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="stat-title">Total Attendees</p>
+              <p className="stat-value">
+                {Array.isArray(events)
+                  ? events.reduce((sum, e) => sum + (e.attendees || 0), 0)
+                  : 0}
+              </p>
+            </div>
+          </div>
+
+          <div className="stat-box">
+            <div className="icon-wrapper bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+              <MapPin className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="stat-title">Locations</p>
+              <p className="stat-value">
+                {Array.isArray(events)
+                  ? new Set(events.map((e) => e.location)).size
+                  : 0}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Create Event Button */}
+        {!isCreatingEvent && (
+          <button
+            onClick={() => setIsCreatingEvent(true)}
+            className="mb-6 flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create New Event
+          </button>
+        )}
+
+        {/* Create Event Form */}
+        {isCreatingEvent && (
+          <form onSubmit={handleCreateEvent} className="create-form">
+            <div className="form-header">
+              <h2>Create New Event</h2>
+              <button onClick={() => setIsCreatingEvent(false)} type="button">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="form-grid">
+              <input
+                type="text"
+                name="type"
+                value={newEvent.type}
+                onChange={handleInputChange}
+                placeholder="Event Type"
+                required
+              />
+              <input
+                type="text"
+                name="location"
+                value={newEvent.location}
+                onChange={handleInputChange}
+                placeholder="Location"
+                required
+              />
+            </div>
+            <textarea
+              name="details"
+              value={newEvent.details}
+              onChange={handleInputChange}
+              placeholder="Event Details"
+              required
+              rows="3"
+            />
+            <input
+              type="number"
+              name="attendees"
+              value={newEvent.attendees}
+              onChange={handleInputChange}
+              placeholder="Initial Attendees"
+              min="0"
+            />
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsCreatingEvent(false)}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn-primary">
+                Create Event
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Events List */}
+        <div className="events-list">
+  {Array.isArray(events) && events.length === 0 ? (
+    <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+      No events found. Create your first event to get started.
+    </div>
+  ) : (
+    Array.isArray(events) &&
+    events.map((event) => (
+      <div key={event.id} className="event-item">
+        <div
+          className="event-header"
+          onClick={() => toggleEventExpansion(event.id)}
+        >
+          <div>
+            <h3>{event.type}</h3>
+            <div className="event-meta">
+              <MapPin className="h-4 w-4 mr-1" />
+              {event.location}
+              <span className="mx-2">•</span>
+              <Users className="h-4 w-4 mr-1" />
+              {event.attendees} attendees
+            </div>
+          </div>
+          <div>
+            {expandedEvent === event.id ? (
+              <ChevronUp className="h-5 w-5 text-gray-400" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-gray-400" />
+            )}
+          </div>
+        </div>
+
+        {expandedEvent === event.id && (
+          <div className="event-body">
+            <p className="event-description">{event.details}</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                <label>Register Attendee</label>
+                <div className="flex">
+                  <input
+                    type="email"
+                    value={attendeeEmail}
+                    onChange={(e) => setAttendeeEmail(e.target.value)}
+                    placeholder="Email address"
+                    className="flex-1 input"
+                  />
+                  <button
+                    onClick={() => handleRegisterAttendee(event.id)}
+                    className="btn-green"
+                  >
+                    Register
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label>Send Notification</label>
+                <div className="flex">
+                  <input
+                    type="text"
+                    value={notificationMessage}
+                    onChange={(e) =>
+                      setNotificationMessage(e.target.value)
+                    }
+                    placeholder="Message"
+                    className="flex-1 input"
+                  />
+                  <button
+                    onClick={() => handleSendNotification(event.id)}
+                    className="btn-blue"
+                  >
+                    <Bell className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => handleDeleteEvent(event.id)}
+                className="btn-danger flex items-center"
+              >
+                <Trash className="h-4 w-4 mr-2" />
+                Delete Event
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    ))
+  )}
+</div>
+</div>
+    </div>
+  );
+};
+
+export default AdminDashboard;
+
+
+
+
+
+
+
+from vs and also cl 
+import { useState, useEffect } from "react"
+import { Plus, Trash, Users, Bell, MapPin, Info, X, Check, ChevronDown, ChevronUp, Edit } from "lucide-react"
+
+const API_URL = "http://127.0.0.1:5000"
+
+const AdminDashboard = () => {
+  const [events, setEvents] = useState([])
+  const [newEvent, setNewEvent] = useState({
+    name: "",
+    location: "",
+    description: "",
+    date: "",
+  })
+
+  const [expandedEvent, setExpandedEvent] = useState(null)
+  const [attendeeEmail, setAttendeeEmail] = useState("")
+  const [notificationMessage, setNotificationMessage] = useState("")
+  const [notification, setNotification] = useState({ show: false, message: "", type: "" })
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false)
+  const [isEditingEvent, setIsEditingEvent] = useState(false)
+
+  // Fetch events on component mount
+  useEffect(() => {
+    fetchEvents()
+  }, [])
+
+  // Fetch all events
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch(`${API_URL}/events`)
+      if (response.ok) {
+        const data = await response.json()
+        setEvents(data.events)
+      } else {
+        showNotification("Failed to fetch events", "error")
+      }
+    } catch (error) {
+      console.error("Error fetching events:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setNewEvent({
+      ...newEvent,
+      [name]: name === "attendees" ? Math.max(0, Number.parseInt(value) || 0) : value,
+    })
+  }
+
+  // Create a new event - removed auth check
+  const handleCreateEvent = async (e) => {
+    e.preventDefault()
+    
+    try {
+      const response = await fetch(`${API_URL}/events`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newEvent.name,
+          description: newEvent.description,
+          date: newEvent.date,
+          location: newEvent.location,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        fetchEvents() // Refresh events list
+        setNewEvent({ name: "", location: "", description: "", date: "" })
+        setIsCreatingEvent(false)
+        showNotification("Event created successfully", "success")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to create event", "error")
+      }
+    } catch (error) {
+      console.error("Error creating event:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Update an event - removed auth check
+  const handleUpdateEvent = async (e) => {
+    e.preventDefault()
+    
+    try {
+      const response = await fetch(`${API_URL}/events/${newEvent.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newEvent.name,
+          description: newEvent.description,
+          date: newEvent.date,
+          location: newEvent.location,
+        }),
+      })
+
+      if (response.ok) {
+        fetchEvents() // Refresh events list
+        setNewEvent({ name: "", location: "", description: "", date: "" })
+        setIsEditingEvent(false)
+        showNotification("Event updated successfully", "success")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to update event", "error")
+      }
+    } catch (error) {
+      console.error("Error updating event:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Delete an event - removed auth check
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      const response = await fetch(`${API_URL}/events/${eventId}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        setEvents(events.filter((event) => event.id !== eventId))
+        showNotification("Event deleted successfully", "success")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to delete event", "error")
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Edit event
+  const handleEditEvent = (event) => {
+    setNewEvent({
+      id: event.id,
+      name: event.type,
+      description: event.details,
+      date: event.date || "",
+      location: event.location,
+    })
+    setIsEditingEvent(true)
+  }
+
+  // Register an attendee - simplified without user lookup
+  const handleRegisterAttendee = async (eventId) => {
+    if (!attendeeEmail) {
+      showNotification("Please enter an attendee email", "error")
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: attendeeEmail,
+          event_id: eventId,
+          status: "registered",
+        }),
+      })
+
+      if (response.ok) {
+        // Update local state to reflect the change
+        setEvents(
+          events.map((event) => 
+            event.id === eventId 
+              ? { ...event, attendees: (event.attendees || 0) + 1 } 
+              : event
+          )
+        )
+        showNotification(`Registered ${attendeeEmail} successfully`, "success")
+        setAttendeeEmail("")
+      } else {
+        const errorData = await response.json()
+        showNotification(errorData.message || "Failed to register attendee", "error")
+      }
+    } catch (error) {
+      console.error("Error registering attendee:", error)
+      showNotification("Error connecting to server", "error")
+    }
+  }
+
+  // Send notification
+  const handleSendNotification = (eventId) => {
+    if (!notificationMessage) {
+      showNotification("Please enter a notification message", "error")
+      return
+    }
+
+    // In a real app, you would call an API endpoint to send notifications
+    // Since there's no specific endpoint in your backend for notifications,
+    // we'll just simulate it for now
+    
+    showNotification("Notification sent to attendees", "success")
+    setNotificationMessage("")
+  }
+
+  // Show notification
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type })
+    setTimeout(() => {
+      setNotification({ show: false, message: "", type: "" })
+    }, 3000)
+  }
+
+  // Toggle event expansion
+  const toggleEventExpansion = (eventId) => {
+    setExpandedEvent(expandedEvent === eventId ? null : eventId)
+  }
+
+  // Calculate total attendees
+  const calculateTotalAttendees = () => {
+    return events.reduce((sum, event) => sum + (event.attendees || 0), 0)
+  }
+
+  // Get unique locations
+  const getUniqueLocations = () => {
+    return new Set(events.map((event) => event.location)).size
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+      {/* Notification */}
+      {notification.show && (
+        <div
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 ${
+            notification.type === "success"
+              ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+              : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+          }`}
+        >
+          {notification.type === "success" ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
+          <span>{notification.message}</span>
+        </div>
+      )}
+
+      <div className="max-w-5xl mx-auto">
+        <header className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your events and attendees</p>
+        </header>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Events</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">{events.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600 dark:text-green-400">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Attendees</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {calculateTotalAttendees()}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
+                <MapPin className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Locations</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {getUniqueLocations()}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Create/Edit Event Button */}
+        {!isCreatingEvent && !isEditingEvent && (
+          <button
+            onClick={() => setIsCreatingEvent(true)}
+            className="mb-6 flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create New Event
+          </button>
+        )}
+
+        {/* Create Event Form */}
+        {isCreatingEvent && (
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Create New Event</h2>
+              <button
+                onClick={() => setIsCreatingEvent(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateEvent} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Event Name
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    value={newEvent.name}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Tech Workshop, Conference"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Location
+                  </label>
+                  <input
+                    id="location"
+                    type="text"
+                    name="location"
+                    value={newEvent.location}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Nairobi, Mombasa"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Date
+                </label>
+                <input
+                  id="date"
+                  type="date"
+                  name="date"
+                  value={newEvent.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={newEvent.description}
+                  onChange={handleInputChange}
+                  placeholder="Describe the event..."
+                  required
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsCreatingEvent(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Create Event
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Edit Event Form */}
+        {isEditingEvent && (
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Event</h2>
+              <button
+                onClick={() => setIsEditingEvent(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateEvent} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Event Name
+                  </label>
+                  <input
+                    id="edit-name"
+                    type="text"
+                    name="name"
+                    value={newEvent.name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="edit-location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Location
+                  </label>
+                  <input
+                    id="edit-location"
+                    type="text"
+                    name="location"
+                    value={newEvent.location}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="edit-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Date
+                </label>
+                <input
+                  id="edit-date"
+                  type="date"
+                  name="date"
+                  value={newEvent.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Event Description
+                </label>
+                <textarea
+                  id="edit-description"
+                  name="description"
+                  value={newEvent.description}
+                  onChange={handleInputChange}
+                  required
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingEvent(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Update Event
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Events List */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Manage Events</h2>
+          </div>
+
+          {events.length === 0 ? (
+            <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+              No events found. Create your first event to get started.
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              {events.map((event) => (
+                <li key={event.id} className="p-6">
+                  <div
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => toggleEventExpansion(event.id)}
+                  >
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{event.type}</h3>
+                      <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {event.location}
+                        {event.date && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span>{new Date(event.date).toLocaleDateString()}</span>
+                          </>
+                        )}
+                        <span className="mx-2">•</span>
+                        <Users className="h-4 w-4 mr-1" />
+                        {event.attendees || 0} attendees
+                      </div>
+                    </div>
+                    <div>
+                      {expandedEvent === event.id ? (
+                        <ChevronUp className="h-5 w-5 text-gray-400" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+
+                  {expandedEvent === event.id && (
+                    <div className="mt-4 space-y-4">
+                      <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                        <div className="flex items-start">
+                          <Info className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{event.details}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Register Attendee
+                          </label>
+                          <div className="flex">
+                            <input
+                              type="email"
+                              value={attendeeEmail}
+                              onChange={(e) => setAttendeeEmail(e.target.value)}
+                              placeholder="Email address"
+                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                            <button
+                              onClick={() => handleRegisterAttendee(event.id)}
+                              className="px-4 py-2 bg-green-600 text-white rounded-r-md hover:bg-green-700"
+                            >
+                              Register
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Send Notification
+                          </label>
+                          <div className="flex">
+                            <input
+                              type="text"
+                              value={notificationMessage}
+                              onChange={(e) => setNotificationMessage(e.target.value)}
+                              placeholder="Notification message"
+                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                            <button
+                              onClick={() => handleSendNotification(event.id)}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
+                            >
+                              <Bell className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end space-x-3">
+                        <button
+                          onClick={() => handleEditEvent(event)}
+                          className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Event
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                        >
+                          <Trash className="h-4 w-4 mr-2" />
+                          Delete Event
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default AdminDashboard
+
+
+
+
+
+today 
+
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Trash,
+  Users,
+  Bell,
+  MapPin,
+  Info,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Edit,
+  LogIn,
+} from "lucide-react";
+
+const API_URL = "http://127.0.0.1:5000";
+
+const AdminDashboard = () => {
+  const [events, setEvents] = useState([]);
+  const [newEvent, setNewEvent] = useState({
+    name: "",
+    location: "",
+    description: "",
+    date: "",
+  });
+
+  const [expandedEvent, setExpandedEvent] = useState(null);
+  const [attendeeEmail, setAttendeeEmail] = useState("");
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false);
+  const [isEditingEvent, setIsEditingEvent] = useState(false);
+
+  // Authentication states
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoginFormVisible, setIsLoginFormVisible] = useState(false);
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Check if user is already logged in on component mount
+  useEffect(() => {
+    checkAuthStatus();
+    fetchEvents();
+  }, []);
+
+  // Check authentication status
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch(`${API_URL}/events`, {
+        credentials: "include", // Important for cookies/session
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setIsAuthenticated(true);
+        setCurrentUser(userData);
+      }
+    } catch (error) {
+      console.error("Error checking auth status:", error);
+    }
+  };
+
+  // Handle login
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(loginData),
+        credentials: "include", // Important for cookies/session
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsAuthenticated(true);
+        setCurrentUser(data.user);
+        setIsLoginFormVisible(false);
+        showNotification("Logged in successfully", "success");
+      } else {
+        const errorData = await response.json();
+        showNotification(errorData.message || "Login failed", "error");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      showNotification("Error connecting to server", "error");
+    }
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${API_URL}/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+        showNotification("Logged out successfully", "success");
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
+  // Handle login form input changes
+  const handleLoginInputChange = (e) => {
+    const { name, value } = e.target;
+    setLoginData({
+      ...loginData,
+      [name]: value,
+    });
+  };
+
+  // Fetch all events
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch(`${API_URL}/events`);
+      if (response.ok) {
+        const data = await response.json();
+        setEvents(data.events);
+      } else {
+        showNotification("Failed to fetch events", "error");
+      }
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      showNotification("Error connecting to server", "error");
+    }
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewEvent({
+      ...newEvent,
+      [name]:
+        name === "attendees" ? Math.max(0, Number.parseInt(value) || 0) : value,
+    });
+  };
+
+  // Create a new event with authentication
+  // const handleCreateEvent = async (e) => {
+  //   e.preventDefault();
+
+  //   if (!isAuthenticated) {
+  //     showNotification("Please log in to create events", "error");
+  //     setIsLoginFormVisible(true);
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch(`${API_URL}/events`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         name: newEvent.name,
+  //         description: newEvent.description,
+  //         date: newEvent.date,
+  //         location: newEvent.location,
+  //       }),
+  //       credentials: "include", // Important for cookies/session
+  //     });
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       fetchEvents(); // Refresh events list
+  //       setNewEvent({ name: "", location: "", description: "", date: "" });
+  //       setIsCreatingEvent(false);
+  //       showNotification("Event created successfully", "success");
+  //     } else {
+  //       const errorData = await response.json();
+  //       showNotification(
+  //         errorData.message || "Failed to create event",
+  //         "error"
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error creating event:", error);
+  //     showNotification("Error connecting to server", "error");
+  //   }
+  // };
+  // const response = await fetch(`${API_URL}/events`, {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify({
+  //     name: newEvent.name,
+  //     description: newEvent.description,
+  //     date: newEvent.date,
+  //     location: newEvent.location,
+  //   }),
+  //   credentials: "include", // Ensure cookies are sent with the request
+  // });
+
+  const handleCreateEvent = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const response = await fetch(`${API_URL}/events`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newEvent.name,
+          description: newEvent.description,
+          date: newEvent.date,
+          location: newEvent.location,
+        }),
+        credentials: "include", // Ensure cookies are sent with the request
+      });
+  
+      // Check if the response is okay (status code 2xx)
+      if (response.ok) {
+        const data = await response.json();
+        fetchEvents(); // Refresh events list
+        setNewEvent({ name: "", location: "", description: "", date: "" });
+        setIsCreatingEvent(false);
+        showNotification("Event created successfully", "success");
+      } else {
+        // Handle error response from the server
+        const errorData = await response.json();
+        showNotification(errorData.message || "Failed to create event", "error");
+      }
+    } catch (error) {
+      console.error("Error creating event:", error);
+      showNotification("Error connecting to server", "error");
+    }
+  };
+  
+  
+
+  // Update an event with authentication
+  const handleUpdateEvent = async (e) => {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+      showNotification("Please log in to update events", "error");
+      setIsLoginFormVisible(true);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/events/${newEvent.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newEvent.name,
+          description: newEvent.description,
+          date: newEvent.date,
+          location: newEvent.location,
+        }),
+        credentials: "include", // Important for cookies/session
+      });
+
+      if (response.ok) {
+        fetchEvents(); // Refresh events list
+        setNewEvent({ name: "", location: "", description: "", date: "" });
+        setIsEditingEvent(false);
+        showNotification("Event updated successfully", "success");
+      } else {
+        const errorData = await response.json();
+        showNotification(
+          errorData.message || "Failed to update event",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error updating event:", error);
+      showNotification("Error connecting to server", "error");
+    }
+  };
+
+  // Delete an event with authentication
+  const handleDeleteEvent = async (eventId) => {
+    if (!isAuthenticated) {
+      showNotification("Please log in to delete events", "error");
+      setIsLoginFormVisible(true);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/events/${eventId}`, {
+        method: "DELETE",
+        credentials: "include", // Important for cookies/session
+      });
+
+      if (response.ok) {
+        setEvents(events.filter((event) => event.id !== eventId));
+        showNotification("Event deleted successfully", "success");
+      } else {
+        const errorData = await response.json();
+        showNotification(
+          errorData.message || "Failed to delete event",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      showNotification("Error connecting to server", "error");
+    }
+  };
+
+  // Edit event
+  const handleEditEvent = (event) => {
+    if (!isAuthenticated) {
+      showNotification("Please log in to edit events", "error");
+      setIsLoginFormVisible(true);
+      return;
+    }
+
+    setNewEvent({
+      id: event.id,
+      name: event.type,
+      description: event.details,
+      date: event.date || "",
+      location: event.location,
+    });
+    setIsEditingEvent(true);
+  };
+
+  // Register an attendee
+  const handleRegisterAttendee = async (eventId) => {
+    if (!attendeeEmail) {
+      showNotification("Please enter an attendee email", "error");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: attendeeEmail,
+          event_id: eventId,
+          status: "registered",
+          // Use the user_id value from your API requirements
+          user_id: 1, // This is a temporary solution - ideally you'd look up the user ID from the email
+        }),
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        // Update local state to reflect the change
+        setEvents(
+          events.map((event) =>
+            event.id === eventId
+              ? { ...event, attendees: (event.attendees || 0) + 1 }
+              : event
+          )
+        );
+        showNotification(`Registered ${attendeeEmail} successfully`, "success");
+        setAttendeeEmail("");
+      } else {
+        const errorData = await response.json();
+        showNotification(
+          errorData.message || "Failed to register attendee",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error registering attendee:", error);
+      showNotification("Error connecting to server", "error");
+    }
+  };
+
+  // Send notification
+  const handleSendNotification = (eventId) => {
+    if (!notificationMessage) {
+      showNotification("Please enter a notification message", "error");
+      return;
+    }
+
+    // In a real app, you would call an API endpoint to send notifications
+    // Since there's no specific endpoint in your backend for notifications,
+    // we'll just simulate it for now
+
+    showNotification("Notification sent to attendees", "success");
+    setNotificationMessage("");
+  };
+
+  // Show notification
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: "", type: "" });
+    }, 3000);
+  };
+
+  // Toggle event expansion
+  const toggleEventExpansion = (eventId) => {
+    setExpandedEvent(expandedEvent === eventId ? null : eventId);
+  };
+
+  // Calculate total attendees
+  const calculateTotalAttendees = () => {
+    return events.reduce((sum, event) => sum + (event.attendees || 0), 0);
+  };
+
+  // Get unique locations
+  const getUniqueLocations = () => {
+    return new Set(events.map((event) => event.location)).size;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+      {/* Notification */}
+      {notification.show && (
+        <div
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 ${
+            notification.type === "success"
+              ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+              : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+          }`}
+        >
+          {notification.type === "success" ? (
+            <Check className="h-5 w-5" />
+          ) : (
+            <X className="h-5 w-5" />
+          )}
+          <span>{notification.message}</span>
+        </div>
+      )}
+
+      <div className="max-w-5xl mx-auto">
+        <header className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Manage your events and attendees
+            </p>
+          </div>
+
+          {/* Authentication buttons */}
+          <div>
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-3">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Welcome, {currentUser?.name || "Admin"}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsLoginFormVisible(true)}
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Login
+              </button>
+            )}
+          </div>
+        </header>
+
+        {/* Login Form */}
+        {isLoginFormVisible && !isAuthenticated && (
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Login
+              </h2>
+              <button
+                onClick={() => setIsLoginFormVisible(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  value={loginData.email}
+                  onChange={handleLoginInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  value={loginData.password}
+                  onChange={handleLoginInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Login
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Total Events
+                </p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {events.length}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600 dark:text-green-400">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Total Attendees
+                </p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {calculateTotalAttendees()}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
+                <MapPin className="h-5 w-5" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Locations
+                </p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {getUniqueLocations()}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Create/Edit Event Button */}
+        {!isCreatingEvent && !isEditingEvent && (
+          <button
+            onClick={() =>
+              isAuthenticated
+                ? setIsCreatingEvent(true)
+                : setIsLoginFormVisible(true)
+            }
+            className="mb-6 flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create New Event
+          </button>
+        )}
+
+        {/* Create Event Form */}
+        {isCreatingEvent && (
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Create New Event
+              </h2>
+              <button
+                onClick={() => setIsCreatingEvent(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateEvent} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    Event Name
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    value={newEvent.name}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Tech Workshop, Conference"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="location"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    Location
+                  </label>
+                  <input
+                    id="location"
+                    type="text"
+                    name="location"
+                    value={newEvent.location}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Nairobi, Mombasa"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="date"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Event Date
+                </label>
+                <input
+                  id="date"
+                  type="date"
+                  name="date"
+                  value={newEvent.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Event Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={newEvent.description}
+                  onChange={handleInputChange}
+                  placeholder="Describe the event..."
+                  required
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsCreatingEvent(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Create Event
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Rest of the component remains the same */}
+        {/* Edit Event Form */}
+        {isEditingEvent && (
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Edit Event
+              </h2>
+              <button
+                onClick={() => setIsEditingEvent(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateEvent} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="edit-name"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    Event Name
+                  </label>
+                  <input
+                    id="edit-name"
+                    type="text"
+                    name="name"
+                    value={newEvent.name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="edit-location"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    Location
+                  </label>
+                  <input
+                    id="edit-location"
+                    type="text"
+                    name="location"
+                    value={newEvent.location}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="edit-date"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Event Date
+                </label>
+                <input
+                  id="edit-date"
+                  type="date"
+                  name="date"
+                  value={newEvent.date}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="edit-description"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Event Description
+                </label>
+                <textarea
+                  id="edit-description"
+                  name="description"
+                  value={newEvent.description}
+                  onChange={handleInputChange}
+                  required
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingEvent(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Update Event
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Events List */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Manage Events
+            </h2>
+          </div>
+
+          {events.length === 0 ? (
+            <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+              No events found. Create your first event to get started.
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              {events.map((event) => (
+                <li key={event.id} className="p-6">
+                  <div
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => toggleEventExpansion(event.id)}
+                  >
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        {event.type}
+                      </h3>
+                      <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {event.location}
+                        {event.date && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span>
+                              {new Date(event.date).toLocaleDateString()}
+                            </span>
+                          </>
+                        )}
+                        <span className="mx-2">•</span>
+                        <Users className="h-4 w-4 mr-1" />
+                        {event.attendees || 0} attendees
+                      </div>
+                    </div>
+                    <div>
+                      {expandedEvent === event.id ? (
+                        <ChevronUp className="h-5 w-5 text-gray-400" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+
+                  {expandedEvent === event.id && (
+                    <div className="mt-4 space-y-4">
+                      <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                        <div className="flex items-start">
+                          <Info className="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            {event.details}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Register Attendee
+                          </label>
+                          <div className="flex">
+                            <input
+                              type="email"
+                              value={attendeeEmail}
+                              onChange={(e) => setAttendeeEmail(e.target.value)}
+                              placeholder="Email address"
+                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                            <button
+                              onClick={() => handleRegisterAttendee(event.id)}
+                              className="px-4 py-2 bg-green-600 text-white rounded-r-md hover:bg-green-700"
+                            >
+                              Register
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Send Notification
+                          </label>
+                          <div className="flex">
+                            <input
+                              type="text"
+                              value={notificationMessage}
+                              onChange={(e) =>
+                                setNotificationMessage(e.target.value)
+                              }
+                              placeholder="Notification message"
+                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                            />
+                            <button
+                              onClick={() => handleSendNotification(event.id)}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700"
+                            >
+                              <Bell className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end space-x-3">
+                        <button
+                          onClick={() => handleEditEvent(event)}
+                          className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Event
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                        >
+                          <Trash className="h-4 w-4 mr-2" />
+                          Delete Event
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Footer */}
+        <footer className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+          <p>
+            © {new Date().getFullYear()} Event Management Platform. All rights
+            reserved.
+          </p>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;
