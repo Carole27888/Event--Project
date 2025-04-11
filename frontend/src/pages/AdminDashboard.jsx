@@ -1,25 +1,3 @@
-<<<<<<< Updated upstream
-/* eslint-disable no-unused-vars */
-"use client"
-=======
-
-import { useState, useEffect } from "react";
-import {
-  Plus,
-  Trash,
-  Users,
-  Bell,
-  MapPin,
-  Info,
-  X,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Edit,
-  LogIn,
-} from "lucide-react";
->>>>>>> Stashed changes
-
 import { useState } from "react"
 import { Plus, Trash, Users, Bell, MapPin, Info, X, Check, ChevronDown, ChevronUp } from "lucide-react"
 
@@ -53,23 +31,7 @@ const AdminDashboard = () => {
     })
   }
 
-<<<<<<< Updated upstream
-  // Create a new event
-  const handleCreateEvent = (e) => {
-    e.preventDefault()
-    const newEventData = { ...newEvent, id: Date.now() }
-    setEvents([...events, newEventData])
-    setNewEvent({ type: "", location: "", details: "", attendees: 0, gallery: [] })
-    setIsCreatingEvent(false)
-    showNotification("Event created successfully", "success")
-  }
 
-  // Delete an event
-  const handleDeleteEvent = (eventId) => {
-    setEvents(events.filter((event) => event.id !== eventId))
-    showNotification("Event deleted", "success")
-  }
-=======
   // Create a new event with authentication
   // const handleCreateEvent = async (e) => {
   //   e.preventDefault();
@@ -255,7 +217,6 @@ const AdminDashboard = () => {
     });
     setIsEditingEvent(true);
   };
->>>>>>> Stashed changes
 
   // Register an attendee
   const handleRegisterAttendee = (eventId) => {
@@ -446,6 +407,8 @@ const AdminDashboard = () => {
                   value={newEvent.attendees}
                   onChange={handleInputChange}
                   min="0"
+                  placeholder="Enter the number of attendees"
+                  required
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 />
               </div>
