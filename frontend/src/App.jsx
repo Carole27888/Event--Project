@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Routes, Route, Link, useNavigate, Navigate } from "react-router-dom"
+import { Routes, Route, Link, useNavigate } from "react-router-dom"
 import { Sun, Moon, Menu, X } from "lucide-react"
 import LoginPage from "./pages/LoginPage"
 import SignUpPage from "./pages/SignUpPage"
@@ -25,65 +25,73 @@ const events = [
   {
     id: "birthday",
     type: "Birthday Event",
-    image: "https://images.unsplash.com/photo-1464349153735-7db50ed83c84?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
+    image:
+      "https://images.unsplash.com/photo-1464349153735-7db50ed83c84?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
     rating: 5,
     description: "Memorable birthday celebrations for all ages",
     totalEvents: 156,
     attendees: 4500,
     locations: ["Nairobi", "Mombasa", "Kisumu", "Nakuru"],
-    details: "Our birthday events are tailored to create unforgettable memories. From children's parties with themes like superheroes and princesses to elegant adult celebrations, we handle everything from venue decoration to entertainment and catering.",
+    details:
+      "Our birthday events are tailored to create unforgettable memories. From children's parties with themes like superheroes and princesses to elegant adult celebrations, we handle everything from venue decoration to entertainment and catering.",
     gallery: [
       "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      "https://images.unsplash.com/photo-1602631985686-1bb0e6a8696e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      "https://images.unsplash.com/photo-1533294455009-a77b7557d2d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1602631985686-1bb0e6a8696e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1533294455009-a77b7557d2d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     ],
   },
   {
     id: "concert",
     type: "Concert Event",
-    image: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    image:
+      "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     rating: 5,
     description: "Spectacular concert setups with amazing sound systems",
     totalEvents: 78,
     attendees: 25000,
     locations: ["Nairobi", "Mombasa", "Eldoret", "Kisumu"],
-    details: "Our concert events feature state-of-the-art sound systems, lighting, and stage setups. We've organized concerts for both local and international artists, ensuring seamless execution from ticket sales to security management.",
+    details:
+      "Our concert events feature state-of-the-art sound systems, lighting, and stage setups. We've organized concerts for both local and international artists, ensuring seamless execution from ticket sales to security management.",
     gallery: [
-      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
-      "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
+      "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     ],
   },
   {
     id: "wedding",
     type: "Wedding Event",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    image:
+      "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     rating: 5,
     description: "Beautiful wedding arrangements for your special day",
     totalEvents: 210,
     attendees: 18000,
     locations: ["Nairobi", "Mombasa", "Nakuru", "Naivasha", "Diani"],
-    details: "Our wedding planning services cover everything from traditional ceremonies to modern celebrations. We handle venue selection, decoration, catering, photography, and entertainment to ensure your special day is perfect in every way.",
+    details:
+      "Our wedding planning services cover everything from traditional ceremonies to modern celebrations. We handle venue selection, decoration, catering, photography, and entertainment to ensure your special day is perfect in every way.",
     gallery: [
-      "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
-      "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      "https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
+      "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     ],
   },
   {
     id: "graduation",
     type: "Graduation Event",
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    image:
+      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     rating: 4.9,
     description: "Celebrate academic achievements in style",
     totalEvents: 95,
     attendees: 12000,
     locations: ["Nairobi", "Kisumu", "Mombasa", "Machakos"],
-    details: "Our graduation events celebrate academic milestones with style and elegance. We organize everything from small departmental ceremonies to large university-wide celebrations, ensuring the day is memorable for graduates and their families.",
+    details:
+      "Our graduation events celebrate academic milestones with style and elegance. We organize everything from small departmental ceremonies to large university-wide celebrations, ensuring the day is memorable for graduates and their families.",
     gallery: [
-      "https://images.unsplash.com/photo-1627556592933-ffe99c1cd9eb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      "https://images.unsplash.com/photo-1621784563330-caee0b138a00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      "https://images.unsplash.com/photo-1564811527855-ed1dbf86a3c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
+      "https://images.unsplash.com/photo-1627556592933-ffe99c1cd9eb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1621784563330-caee0b138a00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1564811527855-ed1dbf86a3c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
     ],
   },
   {
@@ -95,7 +103,8 @@ const events = [
     totalEvents: 120,
     attendees: 35000,
     locations: ["Nairobi", "Eldoret", "Kisumu", "Mombasa", "Nakuru"],
-    details: "Our sports event management covers everything from local tournaments to national championships. We handle venue preparation, equipment, registration, officiating, and award ceremonies for various sports including football, athletics, basketball, and more.",
+    details:
+      "Our sports event management covers everything from local tournaments to national championships. We handle venue preparation, equipment, registration, officiating, and award ceremonies for various sports including football, athletics, basketball, and more.",
     gallery: [
       "https://i.pinimg.com/736x/a1/e7/ca/a1e7ca7e83364f204e9297336822e55f.jpg",
       "https://i.pinimg.com/736x/5f/9c/fb/5f9cfb5435cc38b42750e5859be6c7eb.jpg",
@@ -105,17 +114,19 @@ const events = [
   {
     id: "private",
     type: "Private Event",
-    image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
+    image:
+      "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
     rating: 5,
     description: "Exclusive private events with personalized touches",
     totalEvents: 180,
     attendees: 9000,
     locations: ["Nairobi", "Mombasa", "Naivasha", "Nanyuki", "Malindi"],
-    details: "Our private events are tailored to meet the specific needs and preferences of our clients. From intimate dinners to exclusive corporate gatherings, we ensure privacy, luxury, and attention to detail for a truly memorable experience.",
+    details:
+      "Our private events are tailored to meet the specific needs and preferences of our clients. From intimate dinners to exclusive corporate gatherings, we ensure privacy, luxury, and attention to detail for a truly memorable experience.",
     gallery: [
-      "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+      "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     ],
   },
 ]
@@ -154,7 +165,7 @@ const StarRating = ({ rating }) => {
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-.181h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
       ))}
       <span className="ml-1 text-sm font-medium text-gray-700 dark:text-gray-300">{rating.toFixed(1)}</span>
@@ -163,31 +174,45 @@ const StarRating = ({ rating }) => {
 }
 
 function ProtectedRoute({ children, allowedRoles }) {
-  const userRole = localStorage.getItem("userRole"); // Retrieve the user's role from local storage
-  if (!allowedRoles.includes(userRole)) {
-    return <Navigate to="/login" replace />; // Redirect to login if the role is not allowed
+  const userRole = localStorage.getItem("userRole")
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    // Check authentication on component mount
+    if (!userRole || !allowedRoles.includes(userRole)) {
+      console.log("Access denied. User role:", userRole, "Allowed roles:", allowedRoles)
+      navigate("/login", { replace: true })
+    } else {
+      console.log("Access granted. User role:", userRole)
+    }
+  }, [userRole, allowedRoles, navigate])
+
+  // If we have a valid role, render the children
+  if (userRole && allowedRoles.includes(userRole)) {
+    return children
   }
-  return children;
+
+  // Return null while redirecting to avoid flash of unauthorized content
+  return null
 }
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('darkMode') === 'true' || 
-             window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("darkMode") === "true" || window.matchMedia("(prefers-color-scheme: dark)").matches
     }
-    return false;
-  });
+    return false
+  })
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark")
-      localStorage.setItem('darkMode', 'true')
+      localStorage.setItem("darkMode", "true")
     } else {
       document.documentElement.classList.remove("dark")
-      localStorage.setItem('darkMode', 'false')
+      localStorage.setItem("darkMode", "false")
     }
   }, [darkMode])
 
@@ -349,9 +374,9 @@ function App() {
         <Route path="/events/:eventId" element={<EventDetailPage events={events} />} />
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route
-          path="/admin"
+          path="/admin-dashboard"
           element={
-            <ProtectedRoute allowedRoles={["admin", "admin-dashboard"]}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <AdminDashboard />
             </ProtectedRoute>
           }

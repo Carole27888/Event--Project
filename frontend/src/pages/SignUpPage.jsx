@@ -12,48 +12,70 @@ const SignUpPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+    setSuccess(false)
 
     if (!name || !email || !password || !confirmPassword || !role) {
-      setError("Please fill in all fields");
-      return;
+      setError("Please fill in all fields")
+      setLoading(false)
+      return
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
+      setError("Passwords do not match")
+      setLoading(false)
+      return
     }
 
     try {
+      console.log("Sending signup request to backend...")
+
       const response = await fetch("http://127.0.0.1:5000/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, email, password, role }),
+      })
 
-      });
-      const data = await response.json();
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error(data.message || "Sign-up failed");
+        throw new Error(data.message || "Sign-up failed")
       }
-      console.log("Sign-up successful:", data);
-      setError(""); 
+
+      console.log("Sign-up successful:", data)
+      setSuccess(true)
+      setError("")
+
+      // Store user info in localStorage for persistence
+      localStorage.setItem("userRole", data.user.role)
+      localStorage.setItem("userName", data.user.name)
+      localStorage.setItem("userId", data.user.id)
+
+      // Redirect to login page after successful signup
+      setTimeout(() => {
+        navigate("/login")
+      }, 2000)
     } catch (error) {
-      setError(error.message || "An error occurred during sign-up");
+      console.error("Sign-up error:", error)
+
+      if (error.message === "Failed to fetch") {
+        setError("Connection to server failed. Please make sure the backend is running.")
+      } else {
+        setError(error.message || "An error occurred during sign-up")
+      }
+    } finally {
+      setLoading(false)
     }
-
-    console.log("Registering with:", { name, email, password, role });
-
-    
-
-    setTimeout(() => {
-      navigate("/login");
-    }, 1000);
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-purple-950 px-4 py-24">
@@ -73,6 +95,12 @@ const SignUpPage = () => {
             {error && (
               <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-md text-sm">
                 {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-md text-sm">
+                Account created successfully! Redirecting to login...
               </div>
             )}
 
@@ -231,9 +259,10 @@ const SignUpPage = () => {
                 <div>
                   <button
                     type="submit"
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-300"
+                    disabled={loading}
+                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-300 disabled:opacity-50"
                   >
-                    Sign up
+                    {loading ? "Signing up..." : "Sign up"}
                   </button>
                 </div>
               </div>
@@ -310,4 +339,3 @@ const SignUpPage = () => {
 }
 
 export default SignUpPage
-
