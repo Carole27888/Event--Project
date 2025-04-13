@@ -1,457 +1,229 @@
-from flask import Flask, request, jsonify
+
+from flask import Flask, request, jsonify, session
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-import sqlite3
-import os
-import datetime
-import hashlib
+from sqlalchemy import MetaData
+from models import db, User, Event, Registration, Feedback
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///event.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = 'super_secret_key'  
+app.json.compact = False
+
+metadata = MetaData(naming_convention={
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+})
+db.init_app(app)
+
+migrate = Migrate(app, db)
+bcrypt = Bcrypt(app)
 CORS(app, supports_credentials=True)
 
-# Database setup
-DB_PATH = 'eventify.db'
+def is_logged_in():
+    return 'user_id' in session
 
-def init_db():
-    
-    try:
-        # Connect to the database (creates it if it doesn't exist)
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        
-        # Create users table
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL,
-            role TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        ''')
-        
-        # Create events table
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            type TEXT NOT NULL,
-            location TEXT NOT NULL,
-            date TEXT NOT NULL,
-            details TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        ''')
-        
-        # Create attendees table
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS attendees (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            event_id INTEGER NOT NULL,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (event_id) REFERENCES events (id)
-        )
-        ''')
-        
-        # Create notifications table
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS notifications (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            event_id INTEGER NOT NULL,
-            message TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (event_id) REFERENCES events (id)
-        )
-        ''')
-        
-        conn.commit()
-        conn.close()
-        print("Database initialized successfully")
-    except Exception as e:
-        print(f"Error initializing database: {e}")
-       
-        if os.path.exists(DB_PATH):
-            try:
-                os.remove(DB_PATH)
-                print(f"Removed corrupted database file: {DB_PATH}")
-                conn = sqlite3.connect(DB_PATH)
-                cursor = conn.cursor()
-                
-            
-                cursor.execute('''
-                CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    email TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL,
-                    role TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-                ''')
-                
-                # Create events table
-                cursor.execute('''
-                CREATE TABLE IF NOT EXISTS events (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    type TEXT NOT NULL,
-                    location TEXT NOT NULL,
-                    date TEXT NOT NULL,
-                    details TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-                ''')
-                
-                # Create attendees table
-                cursor.execute('''
-                CREATE TABLE IF NOT EXISTS attendees (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    event_id INTEGER NOT NULL,
-                    name TEXT NOT NULL,
-                    email TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (event_id) REFERENCES events (id)
-                )
-                ''')
-                
-                # Create notifications table
-                cursor.execute('''
-                CREATE TABLE IF NOT EXISTS notifications (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    event_id INTEGER NOT NULL,
-                    message TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (event_id) REFERENCES events (id)
-                )
-                ''')
-                
-                conn.commit()
-                conn.close()
-                print("Database re-initialized successfully after reset")
-            except Exception as e2:
-                print(f"Error re-initializing database after reset: {e2}")
+@app.route('/')
+def index():
+    return "Karibu Eventify"
 
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
-
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
-
-# Initialize database at startup
-init_db()
-
-# Routes
 @app.route('/signup', methods=['POST'])
 def signup():
-    data = request.json
-    name = data.get('name')
-    email = data.get('email')
-    password = data.get('password')
-    role = data.get('role', 'attendee')
-    
-    
-    if not name or not email or not password or not role:
-        return jsonify({'message': 'All fields are required'}), 400
-    
-    
-    hashed_password = hash_password(password)
-    
-    try:
-        init_db()
-        
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = dict_factory
-        cursor = conn.cursor()
-        
-        # Check if email already exists
-        cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
-        existing_user = cursor.fetchone()
-        
-        if existing_user:
-            conn.close()
-            return jsonify({'message': 'Email already registered'}), 400
-        
-        # Insert new user
-        cursor.execute(
-            'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-            (name, email, hashed_password, role)
-        )
-        
-        user_id = cursor.lastrowid
-        
-        # Get the created user (without password)
-        cursor.execute('SELECT id, name, email, role FROM users WHERE id = ?', (user_id,))
-        user = cursor.fetchone()
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify({
-            'message': 'User registered successfully',
-            'user': user
-        })
-    
-    except Exception as e:
-        print(f"Error in signup: {e}")
-        return jsonify({'message': f'Registration failed: {str(e)}'}), 500
+    data = request.get_json()
+    if not all(key in data for key in ('name', 'email', 'password', 'role')):
+        return jsonify({'message': 'Missing required fields'}), 400
+
+    existing_user = User.query.filter_by(email=data['email']).first()
+    if existing_user:
+        return jsonify({'message': 'User already exists'}), 400
+
+    hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+    new_user = User(
+        name=data['name'],
+        email=data['email'],
+        password=hashed_password,
+        role=data['role']
+    )
+    db.session.add(new_user)
+    db.session.commit()
+
+    session['user_id'] = new_user.id
+
+    return jsonify({
+        'message': 'User created successfully',
+        'user': {'id': new_user.id, 'name': new_user.name, 'role': new_user.role}
+    }), 201
 
 @app.route('/login', methods=['POST'])
 def login():
-    data = request.json
-    email = data.get('email')
-    password = data.get('password')
-    role = data.get('role')  # This might be provided from the form
-    
-    if not email or not password:
-        return jsonify({'message': 'Email and password are required'}), 400
-    
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = dict_factory
-        cursor = conn.cursor()
-        
-        # Hash the password
-        hashed_password = hash_password(password)
-        
-        # Find user by email and password
-        cursor.execute('SELECT id, name, email, role FROM users WHERE email = ? AND password = ?', 
-                      (email, hashed_password))
-        user = cursor.fetchone()
-        
-        conn.close()
-        
-        if user:
-            return jsonify({
-                'message': 'Login successful',
-                'user': user
-            })
-        else:
-            # For testing purposes, create a fallback user if database login fails
-            fallback_user = {
-                'id': 1,
-                'name': email.split('@')[0],
-                'email': email,
-                'role': role or 'attendee'  # Use the role from the form or default to attendee
-            }
-            
-            return jsonify({
-                'message': 'Login successful (fallback mode)',
-                'user': fallback_user
-            })
-    
-    except Exception as e:
-        print(f"Error in login: {e}")
-        # For testing purposes, create a fallback user if an error occurs
-        fallback_user = {
-            'id': 1,
-            'name': email.split('@')[0],
-            'email': email,
-            'role': role or 'attendee'  # Use the role from the form or default to attendee
-        }
-        
-        return jsonify({
-            'message': 'Login successful (fallback mode)',
-            'user': fallback_user
-        })
+    data = request.get_json()
+    if not all(key in data for key in ('email', 'password')):
+        return jsonify({'message': 'Missing required fields'}), 400
+
+    user = User.query.filter_by(email=data['email']).first()
+    if not user or not bcrypt.check_password_hash(user.password, data['password']):
+        return jsonify({'message': 'Invalid credentials'}), 401
+
+    session['user_id'] = user.id
+
+    return jsonify({
+        'message': 'Login successful',
+        'user': {'id': user.id, 'name': user.name, 'role': user.role}
+    }), 200
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user_id', None)
+    return jsonify({'message': 'Logout successful'}), 200
 
 @app.route('/me', methods=['GET'])
-def get_user():
-    # In a real app, you would get the user from the session
-    # For this example, we'll just return a dummy user
-    return jsonify({
-        'id': 1,
-        'name': 'Admin User',
-        'email': 'admin@example.com',
-        'role': 'admin'
-    })
+def current_user():
+    if not is_logged_in():
+        return jsonify({'message': 'Not logged in'}), 401
+
+    user = User.query.get(session['user_id'])
+    return jsonify({'id': user.id, 'name': user.name, 'role': user.role})
 
 @app.route('/events', methods=['GET'])
 def get_events():
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = dict_factory
-        cursor = conn.cursor()
-        
-        cursor.execute('SELECT * FROM events ORDER BY id DESC')
-        events = cursor.fetchall()
-        
-        # Add attendee count to each event
-        for event in events:
-            cursor.execute('SELECT COUNT(*) as count FROM attendees WHERE event_id = ?', (event['id'],))
-            count = cursor.fetchone()
-            event['attendees'] = count['count']
-        
-        conn.close()
-        
-        return jsonify({'events': events})
-    except Exception as e:
-        print(f"Error getting events: {e}")
-        return jsonify({'events': [], 'error': str(e)}), 500
+    events = Event.query.all()
+    events_data = [{
+        "id": event.id,
+        "type": event.name,
+        "location": event.location,
+        "date": event.date,
+        "details": event.description,
+        "created_by": event.created_by
+    } for event in events]
+    return jsonify({"events": events_data})
+
+@app.route('/events/<int:event_id>', methods=['GET'])
+def get_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    return jsonify({
+        "id": event.id,
+        "name": event.name,
+        "description": event.description,
+        "date": event.date,
+        "location": event.location,
+        "created_by": event.created_by
+    })
 
 @app.route('/events', methods=['POST'])
 def create_event():
-    data = request.json
-    
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = dict_factory
-        cursor = conn.cursor()
-        
-        cursor.execute(
-            'INSERT INTO events (type, location, date, details) VALUES (?, ?, ?, ?)',
-            (data.get('type'), data.get('location'), data.get('date'), data.get('details'))
-        )
-        
-        event_id = cursor.lastrowid
-        
-        # Get the created event
-        cursor.execute('SELECT * FROM events WHERE id = ?', (event_id,))
-        event = cursor.fetchone()
-        event['attendees'] = 0  # No attendees yet
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify(event)
-    except Exception as e:
-        print(f"Error creating event: {e}")
-        return jsonify({'message': f'Failed to create event: {str(e)}'}), 500
+    if not is_logged_in():
+        return jsonify({"message": "You must be logged in to create an event"}), 401
+
+    data = request.get_json()
+    if not all(field in data for field in ["name", "description", "date", "location"]):
+        return jsonify({"message": "Missing fields"}), 400
+
+    new_event = Event(
+        name=data['name'],
+        description=data['description'],
+        date=data['date'],
+        location=data['location'],
+        created_by=session['user_id']
+    )
+    db.session.add(new_event)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Event created successfully",
+        "event": {"id": new_event.id}
+    }), 201
+
+@app.route('/events/<int:event_id>', methods=['PUT'])
+def update_event(event_id):
+    if not is_logged_in():
+        return jsonify({"message": "You must be logged in to update an event"}), 401
+
+    event = Event.query.get_or_404(event_id)
+
+    if event.created_by != session['user_id']:
+        return jsonify({"message": "You do not have permission to edit this event"}), 403
+
+    data = request.get_json()
+    if 'name' in data:
+        event.name = data['name']
+    if 'description' in data:
+        event.description = data['description']
+    if 'date' in data:
+        event.date = data['date']
+    if 'location' in data:
+        event.location = data['location']
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Event updated successfully",
+        "event": {
+            "id": event.id,
+            "name": event.name,
+            "description": event.description,
+            "date": event.date,
+            "location": event.location
+        }
+    })
 
 @app.route('/events/<int:event_id>', methods=['DELETE'])
 def delete_event(event_id):
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        
-        # Delete attendees first (foreign key constraint)
-        cursor.execute('DELETE FROM attendees WHERE event_id = ?', (event_id,))
-        
-        # Delete notifications (foreign key constraint)
-        cursor.execute('DELETE FROM notifications WHERE event_id = ?', (event_id,))
-        
-        # Delete the event
-        cursor.execute('DELETE FROM events WHERE id = ?', (event_id,))
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify({'message': f'Event {event_id} deleted successfully'})
-    except Exception as e:
-        print(f"Error deleting event: {e}")
-        return jsonify({'message': f'Failed to delete event: {str(e)}'}), 500
+    if not is_logged_in():
+        return jsonify({"message": "You must be logged in to delete an event"}), 401
 
-@app.route('/events/<int:event_id>/attendees', methods=['GET'])
-def get_event_attendees(event_id):
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = dict_factory
-        cursor = conn.cursor()
-        
-        cursor.execute('SELECT * FROM attendees WHERE event_id = ?', (event_id,))
-        attendees = cursor.fetchall()
-        
-        conn.close()
-        
-        return jsonify(attendees)
-    except Exception as e:
-        print(f"Error getting attendees: {e}")
-        return jsonify([]), 500
+    event = Event.query.get_or_404(event_id)
 
-@app.route('/attendees', methods=['POST'])
-def create_attendee():
-    data = request.json
-    
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = dict_factory
-        cursor = conn.cursor()
-        
-        # Extract name from email (before @)
-        email = data.get('email')
-        name = email.split('@')[0] if '@' in email else email
-        
-        cursor.execute(
-            'INSERT INTO attendees (event_id, name, email) VALUES (?, ?, ?)',
-            (data.get('event_id'), name, email)
-        )
-        
-        attendee_id = cursor.lastrowid
-        
-        # Get the created attendee
-        cursor.execute('SELECT * FROM attendees WHERE id = ?', (attendee_id,))
-        attendee = cursor.fetchone()
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify(attendee)
-    except Exception as e:
-        print(f"Error creating attendee: {e}")
-        return jsonify({'message': f'Failed to register attendee: {str(e)}'}), 500
+    if event.created_by != session['user_id']:
+        return jsonify({"message": "You do not have permission to delete this event"}), 403
 
-@app.route('/notifications', methods=['POST'])
-def create_notification():
-    data = request.json
-    
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        
-        cursor.execute(
-            'INSERT INTO notifications (event_id, message) VALUES (?, ?)',
-            (data.get('event_id'), data.get('message'))
-        )
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify({'message': 'Notification sent successfully'})
-    except Exception as e:
-        print(f"Error creating notification: {e}")
-        return jsonify({'message': f'Failed to send notification: {str(e)}'}), 500
+    db.session.delete(event)
+    db.session.commit()
 
-# Add a test route to verify the database is working
-@app.route('/test-db', methods=['GET'])
-def test_db():
-    try:
-        # Try to connect to the database
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        
-        # Check if users table exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
-        users_table = cursor.fetchone()
-        
-        # Check if events table exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='events'")
-        events_table = cursor.fetchone()
-        
-        # Check if attendees table exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='attendees'")
-        attendees_table = cursor.fetchone()
-        
-        # Check if notifications table exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='notifications'")
-        notifications_table = cursor.fetchone()
-        
-        conn.close()
-        
-        return jsonify({
-            'database_exists': os.path.exists(DB_PATH),
-            'users_table_exists': users_table is not None,
-            'events_table_exists': events_table is not None,
-            'attendees_table_exists': attendees_table is not None,
-            'notifications_table_exists': notifications_table is not None
-        })
-    except Exception as e:
-        return jsonify({
-            'error': str(e),
-            'database_exists': os.path.exists(DB_PATH)
-        }), 500
+    return jsonify({"message": "Event deleted successfully"}), 200
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    if not all(key in data for key in ('user_id', 'event_id', 'status')):
+        return jsonify({'message': 'Missing required fields'}), 400
+
+    registration = Registration(
+        user_id=data['user_id'],
+        event_id=data['event_id'],
+        status=data['status']  
+    )
+    db.session.add(registration)
+    db.session.commit()
+    return jsonify({'message': 'Registration successful'}), 201
+
+@app.route('/feedback', methods=['POST'])
+def create_feedback():
+    data = request.get_json()
+    if not all(key in data for key in ('user_id', 'event_id', 'rating')):
+        return jsonify({'message': 'Missing required fields'}), 400
+
+    feedback = Feedback(
+        user_id=data['user_id'],
+        event_id=data['event_id'],
+        rating=data['rating'],
+        comment=data.get('comment')
+    )
+    db.session.add(feedback)
+    db.session.commit()
+    return jsonify({'message': 'Feedback submitted successfully'}), 201
+
+
+@app.route('/feedback/<int:event_id>', methods=['GET'])
+def get_feedback(event_id):
+    feedback_list = Feedback.query.filter_by(event_id=event_id).all()
+    return jsonify([{
+        'id': f.id,
+        'user_id': f.user_id,
+        'rating': f.rating,
+        'comment': f.comment
+    } for f in feedback_list])
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True)
